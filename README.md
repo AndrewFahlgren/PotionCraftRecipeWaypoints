@@ -2,8 +2,11 @@
 This is a Potion Craft mod to help with the managing of "waypoint" recipes.
 
 See the location on the map of your saved "waypoint" recipes. These include any recipes with no effects and any recipes which are far away from their last gathered effect.
+
 Easily figure out where your waypoint recipe will take you if you continue brewing from that recipe by using the Go to waypoint button in the recipe book.
+
 Toggle waypoint recipes on and off to ensure you are only seeing useful waypoints on the map.
+
 Check the path you will be working with if you continue brewing from the recipe by hovering over the waypoint icon on the map. Never continue brewing a recipe just to find your path leads you strait into a wall again!
 
 
