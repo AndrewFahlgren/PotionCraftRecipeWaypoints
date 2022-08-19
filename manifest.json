@@ -1,0 +1,11 @@
+﻿{
+  "$schema": "https://github.com/beat-saber-modding-group/BSIPA-MetadataFileSchema/blob/master/Schema.json",
+  "author": "com.fahlgorithm.potioncraftrecipewaypoints",
+  "description": "A mod to show waypoints on the map for unfinished recipes.",
+  "gameVersion": "0.5.0",
+  "id": "PotionCraftRecipeWaypoints",
+  "name": "PotionCraftRecipeWaypoints",
+  "version": "0.5.0",
+  "dependsOn": {}
+
+}
