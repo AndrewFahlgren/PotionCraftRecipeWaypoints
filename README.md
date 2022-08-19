@@ -1,4 +1,4 @@
-# PotionCraftRecipeWaypoints
+# Recipe Waypoints
 This is a Potion Craft mod to help with the managing of "waypoint" recipes.
 
 See the location on the map of your saved "waypoint" recipes. These include any recipes with no effects and any recipes which are far away from their last gathered effect.
