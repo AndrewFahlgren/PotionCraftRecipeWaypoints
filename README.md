@@ -15,8 +15,8 @@ Check the path you will be working with if you continue brewing from the recipe 
 - Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases)
   - The contents of the BepInEx zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should see a `winhttp.dll` file and `BepInEx` folder alongside your `Potion Craft.exe`
-- Download and install [AlchemyMachineRecipes](https://github.com/AndrewFahlgren/PotionCraftAlchemyMachineRecipes/releases/)
-  - The contents of the AlchemyMachineRecipes zip should be extracted to your PotionCraft steam directory.
-  - If properly installed, you should have a `PotionCraftAlchemyMachineRecipes.dll` file at `Potion Craft/BepInEx/plugins`
+- Download and install [Recipe Waypoints](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/releases/)
+  - The contents of the Recipe Waypoints zip should be extracted to your PotionCraft steam directory.
+  - If properly installed, you should have a `PotionCraftRecipeWaypoints.dll` file at `Potion Craft/BepInEx/plugins`
 
 Also see this user friendly document that walks through the process of installing mods for Potion Craft (credit MattTheDuck): https://docs.google.com/document/d/1UmvUEVOa3IIYowXi6-KTuOIk2-HA1AEFM3V6PxVfhUo
