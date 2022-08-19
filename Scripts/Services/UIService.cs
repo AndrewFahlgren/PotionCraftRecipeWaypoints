@@ -42,7 +42,6 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
     {
         public static void AddWaypointsToMap(List<RecipeIndex> waypointRecipes)
         {
-            Plugin.PluginLogger.LogInfo($"AddWaypointsToMap - start - {waypointRecipes.Count}");
             StaticStorage.Waypoints = new List<WaypointMapItem>();
             waypointRecipes.ForEach(recipe =>
             {
@@ -83,10 +82,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 
             waypointMapItem.transform.parent = Managers.RecipeMap.currentMap.transform;
             waypointMapItem.transform.localPosition = pos;
-            Plugin.PluginLogger.LogInfo($"Added waypoint: {recipe.Recipe.GetLocalizedTitle()} at {waypointMapItem.transform.localPosition}");
 
             waypointMapItem.Recipe = recipe;
             StaticStorage.Waypoints.Add(waypointMapItem);
+
+            Plugin.PluginLogger.LogInfo($"Added waypoint: {recipe.Recipe.GetLocalizedTitle()} at {waypointMapItem.transform.localPosition}");
         }
 
         public static bool ViewWaypointOnMap(RecipeBookRightPageContent rightPageContent)

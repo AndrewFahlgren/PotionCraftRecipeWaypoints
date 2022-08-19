@@ -25,7 +25,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         public static void LoadWaypointsForRecipeLoad()
         {
             StaticStorage.RecipesLoaded = true;
-            Managers.Potion.recipeBook.onRecipeAdded.AddListener(RecipeAdded);
+            if (!StaticStorage.AddedRecipeAddListener)
+            {
+                Managers.Potion.recipeBook.onRecipeAdded.AddListener(RecipeAdded);
+                StaticStorage.AddedRecipeAddListener = true;
+            }
             SaveLoadService.LoadWaypoints();
         }
 

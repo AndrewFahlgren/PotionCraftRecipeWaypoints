@@ -115,11 +115,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 
         public static bool ClearFileSpecificDataOnFileLoad()
         {
-            StaticStorage.Waypoints.ForEach(waypoint =>
-            {
-                UnityEngine.Object.Destroy(waypoint.gameObject);
-            });
-
+            StaticStorage.Waypoints.ForEach(waypoint => UnityEngine.Object.Destroy(waypoint.gameObject));
             StaticStorage.LoadedPotionBases.Clear();
             StaticStorage.Waypoints.Clear();
             StaticStorage.IgnoredWaypoints.Clear();
@@ -130,24 +126,22 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 
         public static void LoadWaypoints()
         {
-            Plugin.PluginLogger.LogInfo($"LoadWaypoints - start");
             if (!StaticStorage.RecipesLoaded) return;
             if (StaticStorage.LoadedPotionBases == null) StaticStorage.LoadedPotionBases = new List<PotionBase>();
             var loadedPotionBase = UIService.GetCurrentPotionBase();
             if (loadedPotionBase == null)
             {
-                Plugin.PluginLogger.LogInfo($"LoadWaypoints - loadedPotionBase == null");
+                Plugin.PluginLogger.LogInfo($"Error: failed to get current potion base");
                 return;
             }
             if (StaticStorage.LoadedPotionBases.Any(b => b.name == loadedPotionBase.name))
             {
-                Plugin.PluginLogger.LogInfo($"LoadWaypoints - already loaded potion base");
+                Plugin.PluginLogger.LogInfo($"Error: already loaded potion base");
                 return;
             }
             StaticStorage.LoadedPotionBases.Add(loadedPotionBase);
             UIService.AddWaypointsToMap(RecipeService.GetWaypointRecipes(loadedPotionBase));
             UIService.CreateWaypointToggleButton(Managers.RecipeMap.recipeMapObject.followIndicatorButton);
-            Plugin.PluginLogger.LogInfo($"LoadWaypoints - end");
         }
 
         /// <summary>
