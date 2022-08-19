@@ -40,6 +40,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
     /// </summary>
     public static class UIService
     {
+        /// <summary>
+        /// Adds waypoints for the specified waypoint recipes to the map
+        /// </summary>
         public static void AddWaypointsToMap(List<RecipeIndex> waypointRecipes)
         {
             StaticStorage.Waypoints = new List<WaypointMapItem>();
@@ -49,6 +52,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             });
         }
 
+        /// <summary>
+        /// Adds a waypoint to the map for the specified recipe
+        /// </summary>
         public static void AddWaypointToMap(RecipeIndex recipe)
         {
             var pos = RecipeService.GetMapPositionForRecipe(recipe);
@@ -89,6 +95,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             Plugin.PluginLogger.LogInfo($"Added waypoint: {recipe.Recipe.GetLocalizedTitle()} at {waypointMapItem.transform.localPosition}");
         }
 
+        /// <summary>
+        /// Prefix method for ViewWaypointsOnMapPatch
+        /// Switches the current room to the lab and zooms in on the waypoint for the currently selected waypoint recipe
+        /// </summary>
         public static bool ViewWaypointOnMap(RecipeBookRightPageContent rightPageContent)
         {
             var recipe = rightPageContent.currentPotion;
@@ -99,6 +109,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return false;
         }
 
+        /// <summary>
+        /// Creates a path visual similar to the visual used when continuing brewing for this waypoint and assigns it to the specified waypoint's path property
+        /// </summary>
         public static void CreateWaypointHoverPath(WaypointMapItem waypointMapItem)
         {
             waypointMapItem.path = new GameObject("WaypointPath");
@@ -149,6 +162,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             waypointMapItem.path.transform.localPosition = serializedPath.pathPosition;
         }
 
+        /// <summary>
+        /// Updates all content on both right page instances in the recipe book
+        /// This will trigger our patch which refreshes the states of all our custom buttons
+        /// </summary>
         public static void UpdateCurrentRecipePage()
         {
             Managers.Potion.recipeBook.GetComponentsInChildren<RecipeBookRightPageContent>().ToList().ForEach(rightPageContent =>
@@ -157,6 +174,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             });
         }
 
+        /// <summary>
+        /// Prefix method for FixButtonInitializationExceptionPatch
+        /// Due to the order in which things are initialized for our custom version of the brew button a nessesary field is not loaded in time
+        /// This method loads that field in the case it is null to prevent an exception in this case
+        /// </summary>
         public static bool FixButtonInitializationException(Slot instance)
         {
             if (instance.cursorAnchorSubObject == null)
@@ -167,17 +189,27 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return false;
         }
 
+        /// <summary>
+        /// Removes the specified WaypointMapItem from the map and from the Waypoints list
+        /// </summary>
         public static void DeleteWaypoint(WaypointMapItem matchingWaypoint)
         {
             StaticStorage.Waypoints.Remove(matchingWaypoint);
             UnityEngine.Object.Destroy(matchingWaypoint.gameObject);
         }
 
+        /// <summary>
+        /// Returns the potion base for the currently loaded map
+        /// </summary>
         public static PotionBase GetCurrentPotionBase()
         {
             return Managers.RecipeMap?.currentMap?.potionBase;
         }
 
+        /// <summary>
+        /// Postfix method for ModifyBrewPotionButtonForWaypointRecipesPatch
+        /// This method creates both the custom brew potion button and the recipe waypoint toggle button for this right page instance
+        /// </summary>
         public static void ModifyBrewPotionButtonForWaypointRecipes(RecipeBookBrewPotionButton instance, RecipeBookRightPageContent rightPageContent)
         {
             const float recipeIconScaleFactor = 0.65f;
@@ -217,6 +249,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             }
         }
 
+        /// <summary>
+        /// Creates the main map waypoint toggle button
+        /// </summary>
         public static void CreateWaypointToggleButton(FollowIndicatorButton instance)
         {
             if (StaticStorage.WaypointToggleButton != null)
@@ -252,6 +287,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             ShowHideWaypoints(false);
         }
 
+        /// <summary>
+        /// Creates the waypoint toggle button for this recipe right page instance
+        /// </summary>
         public static void CreateRecipeBookWaypointToggleButton(RecipeBookRightPageContent instance)
         {
             if (!StaticStorage.WaypointToggleButtonRecipeBook.ContainsKey(instance))
@@ -293,11 +331,17 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                                             : color;
         }
 
+        /// <summary>
+        /// Toggles the visibility of all waypoints on the map
+        /// </summary>
         public static void ShowHideWaypoints()
         {
             ShowHideWaypoints(!StaticStorage.WaypointsVisible);
         }
 
+        /// <summary>
+        /// Returns the map coordinates of the specified potion effect for the specified potion base
+        /// </summary>
         public static Vector2 GetEffectMapLocation(PotionEffect potionEffect, PotionBase potionBase)
         {
             var map = MapLoader.loadedMaps.FirstOrDefault(m => m.potionBase.name == potionBase.name);
@@ -310,11 +354,17 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return mapEffect.thisTransform.localPosition;
         }
 
+        /// <summary>
+        /// Returns the diameter of the potion indicator
+        /// </summary>
         public static float GetIndicatorDiameter()
         {
             return Managers.RecipeMap.indicator.circleCollider.radius * 2;
         }
 
+        /// <summary>
+        /// Gets the sprite used for all recipe waypoint related things
+        /// </summary>
         private static Sprite GetWaypointSprite()
         {
             if (StaticStorage.RecipeWaypointSprite == null)
@@ -324,17 +374,26 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return StaticStorage.RecipeWaypointSprite;
         }
 
+        /// <summary>
+        /// Get the base color used for the waypoint sprite
+        /// </summary>
         private static Color GetWaypointSpriteColor()
         {
             return Settings<RecipeMapManagerTeleportationSettings>.Asset.colorFixed;
         }
 
+        /// <summary>
+        /// Gets the specific color with alpha for the waypoint map item
+        /// </summary>
         private static Color GetWaypointMapItemColor()
         {
             var color = GetWaypointSpriteColor();
             return new Color(color.r, color.g, color.b, WaypointMapItem.WaypointAlpha);
         }
 
+        /// <summary>
+        /// Gets the current color for the main map waypoint toggle button depending on its current state
+        /// </summary>
         private static Color GetWaypointToggleButtonColor()
         {
             var color = GetWaypointSpriteColor();
@@ -342,6 +401,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return new Color(color.r, color.g, color.b, StaticStorage.WaypointToggleButton.OffAlpha);
         }
 
+        /// <summary>
+        /// Gets a generic waypoint toggle button
+        /// </summary>
         private static WaypointToggleButton GetWaypointToggleButton(Transform parent)
         {
             var gameObject = new GameObject("WaypointToggleButton");
@@ -365,6 +427,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return waypointButton;
         }
 
+        /// <summary>
+        /// Creates and adds a tooltip provider using the specified settings to the specified InteractiveItem
+        /// </summary>
         private static void AddTooltipProvider(InteractiveItem obj, GameObject gameObject, List<PositioningSettings> position)
         {
             var tooltipProvider = gameObject.AddComponent<TooltipContentProvider>();
@@ -372,6 +437,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             typeof(InteractiveItem).GetField("tooltipContentProvider", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(obj, tooltipProvider);
         }
 
+        /// <summary>
+        /// Sets the visibility of all waypoints on the map to the specified value
+        /// </summary>
         public static void ShowHideWaypoints(bool show)
         {
             if (StaticStorage.Waypoints == null) return;
@@ -380,6 +448,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             UpdateWaypointToggleButtonSprite();
         }
 
+        /// <summary>
+        /// Updates the color for the waypoint toggle button depending on its state
+        /// </summary>
         private static void UpdateWaypointToggleButtonSprite()
         {
             if (StaticStorage.WaypointToggleButton == null) return;

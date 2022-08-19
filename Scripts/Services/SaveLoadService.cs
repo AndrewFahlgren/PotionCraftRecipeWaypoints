@@ -12,6 +12,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 {
     public static class SaveLoadService
     {
+        /// <summary>
+        /// Postfix method for StoreIgnoredWaypointsPatch
+        /// Stores ignored waypoints list at the end of the save file with a custom field name
+        /// </summary>
         public static void StoreIgnoredWaypoints(ref string result)
         {
             string modifiedResult = null;
@@ -44,6 +48,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             }
         }
 
+        /// <summary>
+        /// Prefix method for RetreiveStoredIgnoredWaypointsPatch
+        /// Reads the raw json string to find our custom field and parse any ignored waypoints within it
+        /// </summary>
         public static bool RetreiveStoredIgnoredWaypoints(Type type)
         {
             if (type != typeof(ProgressState)) return true;
@@ -113,6 +121,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return true;
         }
 
+        /// <summary>
+        /// Prefix method for ClearFileSpecificDataOnFileLoadPatch
+        /// Clears out any stored static data from a previous game file if this isn't the first load of the session
+        /// </summary>
+        /// <returns></returns>
         public static bool ClearFileSpecificDataOnFileLoad()
         {
             StaticStorage.Waypoints.ForEach(waypoint => UnityEngine.Object.Destroy(waypoint.gameObject));
@@ -123,7 +136,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return true;
         }
 
-
+        /// <summary>
+        /// Postfix method for LoadWaypoints
+        /// Loads the waypoints for the current map if the recipe book is already loaded
+        /// </summary>
         public static void LoadWaypoints()
         {
             if (!StaticStorage.RecipesLoaded) return;

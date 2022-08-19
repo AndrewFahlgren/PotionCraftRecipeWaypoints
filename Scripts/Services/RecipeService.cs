@@ -1,19 +1,10 @@
 ﻿using PotionCraft.ManagersSystem;
-using PotionCraft.ManagersSystem.Potion;
-using PotionCraft.ObjectBased.AlchemyMachine;
 using PotionCraft.ObjectBased.Potion;
-using PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
 using PotionCraft.ScriptableObjects;
-using PotionCraft.ScriptableObjects.AlchemyMachineProducts;
 using PotionCraftRecipeWaypoints.Scripts.Storage;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
-using static PotionCraft.SaveLoadSystem.ProgressState;
-using static PotionCraft.ScriptableObjects.Potion;
-using static PotionCraft.ScriptableObjects.Potion.UsedComponent;
 
 namespace PotionCraftRecipeWaypoints.Scripts.Services
 {
@@ -22,6 +13,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
     /// </summary>
     public static class RecipeService
     {
+        /// <summary>
+        /// Postfix method for LoadWaypointsForRecipeLoadPatch
+        /// Loads waypoints for the currently loaded map when the recipe book has finished loading
+        /// </summary>
         public static void LoadWaypointsForRecipeLoad()
         {
             StaticStorage.RecipesLoaded = true;
@@ -33,15 +28,26 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             SaveLoadService.LoadWaypoints();
         }
 
+        /// <summary>
+        /// Returns the saved map position of the indicator for this recipe
+        /// </summary>
         public static Vector2 GetMapPositionForRecipe(RecipeIndex recipe)
         {
             return GetMapPositionForRecipe(recipe.Recipe);
         }
+
+        /// <summary>
+        /// Returns the saved map position of the indicator for this recipe
+        /// </summary>
         public static Vector2 GetMapPositionForRecipe(Potion recipe)
         {
             return recipe.potionFromPanel.serializedPath.indicatorTargetPosition;
         }
 
+
+        /// <summary>
+        /// Returns all waypoint recipes for the specified potion base (excluding ignored)
+        /// </summary>
         public static List<RecipeIndex> GetWaypointRecipes(PotionBase loadedPotionBase)
         {
             var savedRecipes = Managers.Potion.recipeBook.savedRecipes;
@@ -58,6 +64,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return returnList;
         }
 
+        /// <summary>
+        /// Postfix method for RecipeDeletedPatch
+        /// Finds and removes the waypoint for the deleted recipe if there was a waypoint for that recipe
+        /// </summary>
         public static void RecipeDeleted(Potion recipe)
         {
             var matchingWaypoint = StaticStorage.Waypoints.FirstOrDefault(w => w.Recipe.Recipe == recipe);
@@ -69,6 +79,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             UIService.DeleteWaypoint(matchingWaypoint);
         }
 
+        /// <summary>
+        /// Finds and adds the new recipe waypoint if the new recipe is a waypoint
+        /// </summary>
         public static void RecipeAdded()
         {
             var existingWaypointIndexes = StaticStorage.Waypoints.Select(w => w.Recipe.Index).ToList();
@@ -76,6 +89,12 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             UIService.AddWaypointToMap(newRecipe);
         }
 
+        /// <summary>
+        /// Returns whether or not this recipe is a waypoint recipe
+        /// </summary>
+        /// <param name="recipe">the recipe to check</param>
+        /// <param name="returnIgnored">if true will bypass the ignore list
+        /// if false this method will return false if the recipe is in the ignore list</param>
         public static bool IsWaypointRecipe(Potion recipe, bool returnIgnored = false)
         {
             const int waypointGenerationDistance = 5;
@@ -91,6 +110,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return false;
         }
 
+        /// <summary>
+        /// Returns the recipe at the specified recipe index if the recipe is a waypoint
+        /// </summary>
         public static RecipeIndex GetWaypointRecipeAtIndex(int index)
         {
             var recipe = Managers.Potion.recipeBook.savedRecipes[index];
@@ -98,6 +120,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return new RecipeIndex { Index = index, Recipe = recipe };
         }
 
+        /// <summary>
+        /// Toggles the ignored status of the selected recipe
+        /// </summary>
         public static void ToggleWaypointForSelectedRecipe(RecipeIndex recipe)
         {
             if (recipe == null) return;
@@ -114,11 +139,17 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             UIService.UpdateCurrentRecipePage();
         }
 
+        /// <summary>
+        /// Determines if this is a legendary recipe from the Alchemy Machine Recipes mod
+        /// </summary>
         public static bool IsLegendaryRecipe(Potion recipe)
         {
             return recipe.potionFromPanel.recipeMarks.Count(m => m.type == SerializedRecipeMark.Type.PotionBase) > 1;
         }
 
+        /// <summary>
+        /// Returns the index for a recipe
+        /// </summary>
         public static RecipeIndex GetRecipeIndexObject(Potion recipe)
         {
             return new RecipeIndex { Recipe = recipe, Index = Managers.Potion.recipeBook.savedRecipes.IndexOf(recipe) };
