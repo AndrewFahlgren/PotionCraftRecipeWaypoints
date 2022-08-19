@@ -219,6 +219,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 
         public static void CreateWaypointToggleButton(FollowIndicatorButton instance)
         {
+            if (StaticStorage.WaypointToggleButton != null)
+            {
+                ShowHideWaypoints(false);
+                return;
+            }
             var collider = instance.GetComponent<BoxCollider2D>();
             collider.size = new Vector2(3, collider.size.y);
             var waypointButton = GetWaypointToggleButton(instance.transform.parent);

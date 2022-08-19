@@ -113,6 +113,20 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return true;
         }
 
+        public static bool ClearFileSpecificDataOnFileLoad()
+        {
+            StaticStorage.Waypoints.ForEach(waypoint =>
+            {
+                UnityEngine.Object.Destroy(waypoint.gameObject);
+            });
+
+            StaticStorage.LoadedPotionBases.Clear();
+            StaticStorage.Waypoints.Clear();
+            StaticStorage.IgnoredWaypoints.Clear();
+            StaticStorage.RecipesLoaded = false;
+            return true;
+        }
+
 
         public static void LoadWaypoints()
         {

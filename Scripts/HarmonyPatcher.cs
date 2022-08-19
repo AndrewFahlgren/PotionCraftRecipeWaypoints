@@ -135,4 +135,13 @@ namespace PotionCraftRecipeWaypoints.Scripts
             return Ex.RunSafe(() => SaveLoadService.RetreiveStoredIgnoredWaypoints(type));
         }
     }
+
+    [HarmonyPatch(typeof(SaveLoadManager), "LoadFile")]
+    public class ClearFileSpecificDataOnFileLoadPatch
+    {
+        static bool Prefix()
+        {
+            return Ex.RunSafe(() => SaveLoadService.ClearFileSpecificDataOnFileLoad());
+        }
+    }
 }
