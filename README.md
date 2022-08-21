@@ -32,4 +32,4 @@ Toggle waypoint recipes on and off to ensure you are only seeing useful waypoint
   - The contents of the RecipeWaypoints zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should have a `PotionCraftRecipeWaypoints.dll` file at `Potion Craft/BepInEx/plugins`
 
-Also see this user friendly document that walks through the process of installing mods for Potion Craft (credit MattTheDuck): https://docs.google.com/document/d/1UmvUEVOa3IIYowXi6-KTuOIk2-HA1AEFM3V6PxVfhUo
+Also see this user friendly document that walks through the process of installing mods for Potion Craft (credit catgocri): https://docs.google.com/document/d/1UmvUEVOa3IIYowXi6-KTuOIk2-HA1AEFM3V6PxVfhUo
