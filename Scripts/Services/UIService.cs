@@ -92,6 +92,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             waypointMapItem.Recipe = recipe;
             StaticStorage.Waypoints.Add(waypointMapItem);
 
+            if (!StaticStorage.WaypointsVisible) gameObject.SetActive(false);
+
             Plugin.PluginLogger.LogInfo($"Added waypoint: {recipe.Recipe.GetLocalizedTitle()} at {waypointMapItem.transform.localPosition}");
         }
 
