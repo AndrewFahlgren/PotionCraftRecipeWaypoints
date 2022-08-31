@@ -31,7 +31,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Storage
         //The current state of the main map waypoint toggle button
         public static bool WaypointsVisible;
         //Ensures we do not add a listener more than once
-        public static bool AddedRecipeAddListener;
+        public static bool AddedListeners;
 
         //Used only during save for a short period of time
         public static string StateJsonString;

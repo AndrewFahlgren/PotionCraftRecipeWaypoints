@@ -108,6 +108,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             MapLoader.SelectMapIfNotSelected(recipe.potionBase);
             Managers.RecipeMap.CenterMapOn(recipe.potionFromPanel.serializedPath.indicatorTargetPosition, true, 1.0f);
             Managers.Room.GoTo(RoomManager.RoomIndex.Laboratory, true);
+            if (!StaticStorage.WaypointsVisible) ShowHideWaypoints(true);
             return false;
         }
 

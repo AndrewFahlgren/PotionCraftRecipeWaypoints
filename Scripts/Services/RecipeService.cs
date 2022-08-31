@@ -1,7 +1,9 @@
 ﻿using PotionCraft.ManagersSystem;
 using PotionCraft.ObjectBased.Potion;
+using PotionCraft.ObjectBased.UIElements.Bookmarks;
 using PotionCraft.ScriptableObjects;
 using PotionCraftRecipeWaypoints.Scripts.Storage;
+using PotionCraftRecipeWaypoints.Scripts.UIComponents;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -20,10 +22,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         public static void LoadWaypointsForRecipeLoad()
         {
             StaticStorage.RecipesLoaded = true;
-            if (!StaticStorage.AddedRecipeAddListener)
+            if (!StaticStorage.AddedListeners)
             {
                 Managers.Potion.recipeBook.onRecipeAdded.AddListener(RecipeAdded);
-                StaticStorage.AddedRecipeAddListener = true;
+                Managers.Potion.recipeBook.bookmarkControllersGroupController.onBookmarksRearranged.AddListener(BookmarksRearranged);
+                StaticStorage.AddedListeners = true;
             }
             SaveLoadService.LoadWaypoints();
         }
@@ -34,6 +37,22 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         public static Vector2 GetMapPositionForRecipe(RecipeIndex recipe)
         {
             return GetMapPositionForRecipe(recipe.Recipe);
+        }
+
+        public static void RecipeDeletedFromBook(Potion recipe)
+        {
+            RecipeDeleted(recipe);
+            var matchingWaypoint = StaticStorage.Waypoints.FirstOrDefault(w => w.Recipe.Recipe == recipe);
+            if (matchingWaypoint == null)
+            {
+                Plugin.PluginLogger.LogError("Error: unable to find saved waypoint for recipe deletion (RecipeDeletedFromBook)!");
+                return;
+            }
+            //We don't want the next recipe that goes into this slot to be ignored so remove this index from the ignore list
+            if (StaticStorage.IgnoredWaypoints.Contains(matchingWaypoint.Recipe.Index))
+            {
+                StaticStorage.IgnoredWaypoints.Remove(matchingWaypoint.Recipe.Index);
+            }
         }
 
         /// <summary>
@@ -88,6 +107,24 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             var newRecipe = GetWaypointRecipes(UIService.GetCurrentPotionBase()).FirstOrDefault(p => !existingWaypointIndexes.Contains(p.Index));
             if (newRecipe == null) return;
             UIService.AddWaypointToMap(newRecipe);
+        }
+
+        private static void BookmarksRearranged(BookmarkController bookmarksController, List<int> intList)
+        {
+            var oldIgnored = StaticStorage.IgnoredWaypoints.ToList();
+            var newIgnored = new List<int>();
+            var oldWaypointIndexes = StaticStorage.Waypoints.Select(w => new { waypoint = w, oldIndex = w.Recipe.Index}).ToList();
+            for (var newIndex = 0; newIndex < intList.Count; newIndex++)
+            {
+                var oldIndex = intList[newIndex];
+                //This will recreate the old ignored list making sure to update any indexes along the way
+                if (oldIgnored.Contains(oldIndex)) newIgnored.Add(newIndex);
+                if (intList[newIndex] == newIndex) continue;
+                var affectedWaypoint = oldWaypointIndexes.FirstOrDefault(w => w.oldIndex == oldIndex);
+                if (affectedWaypoint == null) continue;
+                affectedWaypoint.waypoint.Recipe.Index = newIndex;
+            }
+            StaticStorage.IgnoredWaypoints = newIgnored;
         }
 
         /// <summary>

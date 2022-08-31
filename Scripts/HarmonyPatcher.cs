@@ -44,7 +44,7 @@ namespace PotionCraftRecipeWaypoints.Scripts
     {
         static void Postfix(Potion potion)
         {
-            Ex.RunSafe(() => RecipeService.RecipeDeleted(potion));
+            Ex.RunSafe(() => RecipeService.RecipeDeletedFromBook(potion));
         }
     }
 
