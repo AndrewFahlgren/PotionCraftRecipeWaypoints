@@ -86,6 +86,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         {
             var existingWaypointIndexes = StaticStorage.Waypoints.Select(w => w.Recipe.Index).ToList();
             var newRecipe = GetWaypointRecipes(UIService.GetCurrentPotionBase()).FirstOrDefault(p => !existingWaypointIndexes.Contains(p.Index));
+            if (newRecipe == null) return;
             UIService.AddWaypointToMap(newRecipe);
         }
 
