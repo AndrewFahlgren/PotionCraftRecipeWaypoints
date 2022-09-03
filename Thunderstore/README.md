@@ -56,3 +56,6 @@ See [this guide](https://docs.google.com/document/d/1Y3PDeMaffkh7x4U3j46YZ9K6AhM
 I am making a series of mods which make recipes easier to use. All of these mods are intended to be balanced and feel like part of the base game:
 
 [Alchemy Machine Recipes](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Alchemy_Machine_Recipes/) - Enables the save recipe button when making things with the alchemy machine. Make legendary stones and salts with the click of a button!
+
+[Pour Back In](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Pour_Back_In/) - Makes your potions work just like recipes. Pour potions back in the cauldron to continue where you left off. You can also finish potions before you add any effects so you can come back to them later just like a waypoint recipe.
+
