@@ -21,7 +21,9 @@ Toggle waypoint recipes on and off to ensure you are only seeing useful waypoint
 
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Mark%20as%20waypoint.png?raw=true)
 
+## Showcase Video
 
+See this [showcase video](https://www.youtube.com/watch?v=UPTAWGjC-0g) to see everything this mod does
 
 ## Installation
 
@@ -47,3 +49,5 @@ See [this guide](https://docs.google.com/document/d/1Y3PDeMaffkh7x4U3j46YZ9K6AhM
 I am making a series of mods which make recipes easier to use. All of these mods are intended to be balanced and feel like part of the base game:
 
 [Alchemy Machine Recipes](https://github.com/AndrewFahlgren/PotionCraftAlchemyMachineRecipes) - Enables the save recipe button when making things with the alchemy machine. Make legendary stones and salts with the click of a button!
+
+[Pour Back In](https://github.com/AndrewFahlgren/PotionCraftPourBackIn) - Makes your potions work just like recipes. Pour potions back in the cauldron to continue where you left off. You can also finish potions before you add any effects so you can come back to them later just like a waypoint recipe.
