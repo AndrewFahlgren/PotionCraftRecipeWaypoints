@@ -21,7 +21,9 @@ Toggle waypoint recipes on and off to ensure you are only seeing useful waypoint
 
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Mark%20as%20waypoint.png?raw=true)
 
+## Showcase Video
 
+See this [showcase video](https://www.youtube.com/watch?v=UPTAWGjC-0g) to see everything this mod does
 
 ## Installation
 
