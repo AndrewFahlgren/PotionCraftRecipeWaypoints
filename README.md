@@ -27,11 +27,6 @@ See this [showcase video](https://www.youtube.com/watch?v=UPTAWGjC-0g) to see ev
 
 ## Installation
 
-### Automatic installation with [r2modman mod manager](https://thunderstore.io/package/ebkr/r2modman/)
-
-Go to [Recipe Waypoints on Thunderstore](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Recipe_Waypoints/) and press "Install with Mod Manager".
-
-### Manual installation
 If you are not sure where your Potion Craft steam directory is you can find out by opening steam, going to your library, and right clicking on Potion Craft > Properties > Local Files > Browse.
 
 - Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases)
@@ -41,6 +36,14 @@ If you are not sure where your Potion Craft steam directory is you can find out 
   - The contents of the RecipeWaypoints zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should have a `PotionCraftRecipeWaypoints.dll` file at `Potion Craft/BepInEx/plugins`
   
+
+### Automatic installation with [r2modman mod manager](https://thunderstore.io/package/ebkr/r2modman/)
+
+r2modman makes it easy to install Recipe Waypoints although you will need to launch the game from the mod manager each time you play Potion Craft.
+
+- Go to [Recipe Waypoints on Thunderstore](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Recipe_Waypoints/) and press "Install with Mod Manager".
+
+
 ### Steam Deck Installation
 See [this guide](https://docs.google.com/document/d/1Y3PDeMaffkh7x4U3j46YZ9K6AhM2EvRF9v3mAGBFzW4) for installing Potion Craft mods on the Steam Deck
 
