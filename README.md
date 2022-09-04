@@ -29,7 +29,7 @@ See this [showcase video](https://www.youtube.com/watch?v=UPTAWGjC-0g) to see ev
 
 If you are not sure where your Potion Craft steam directory is you can find out by opening steam, going to your library, and right clicking on Potion Craft > Properties > Local Files > Browse.
 
-- Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases)
+- Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases/latest)
   - The contents of the BepInEx zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should see a `winhttp.dll` file and `BepInEx` folder alongside your `Potion Craft.exe`
 - Download and install [Recipe Waypoints](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/releases/)
@@ -39,7 +39,7 @@ If you are not sure where your Potion Craft steam directory is you can find out 
 
 ### Automatic installation with [r2modman mod manager](https://thunderstore.io/package/ebkr/r2modman/)
 
-r2modman makes it easy to install Recipe Waypoints although you will need to launch the game from the mod manager each time you play Potion Craft.
+r2modman makes it easy to install Recipe Waypoints although you will need to launch Potion Craft from the mod manager each time you play.
 
 - Go to [Recipe Waypoints on Thunderstore](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Recipe_Waypoints/) and press "Install with Mod Manager".
 
