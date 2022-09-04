@@ -27,7 +27,7 @@ See this [showcase video](https://www.youtube.com/watch?v=UPTAWGjC-0g) to see ev
 
 ## Installation
 
-### Automatic installation with [Thunderstore Mod Manager](https://www.overwolf.com/app/Thunderstore-Thunderstore_Mod_Manager) or [r2modman mod manager](https://thunderstore.io/package/ebkr/r2modman/)
+### Automatic installation with [r2modman mod manager](https://thunderstore.io/package/ebkr/r2modman/)
 
 Go to [Recipe Waypoints on Thunderstore](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Recipe_Waypoints/) and press "Install with Mod Manager".
 
