@@ -53,4 +53,6 @@ I am making a series of mods which make recipes easier to use. All of these mods
 
 [Alchemy Machine Recipes](https://github.com/AndrewFahlgren/PotionCraftAlchemyMachineRecipes) - Enables the save recipe button when making things with the alchemy machine. Make legendary stones and salts with the click of a button!
 
+[Bookmark Organizer](https://github.com/AndrewFahlgren/PotionCraftBookmarkOrganizer) - Lets you organize your recipes into groups! Save space in your recipe book and make it faster to find the recipe you are looking for!
+
 [Pour Back In](https://github.com/AndrewFahlgren/PotionCraftPourBackIn) - Makes your potions work just like recipes. Pour potions back in the cauldron to continue where you left off. You can also finish potions before you add any effects so you can come back to them later just like a waypoint recipe.
