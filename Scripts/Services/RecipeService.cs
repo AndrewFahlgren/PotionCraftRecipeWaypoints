@@ -2,6 +2,7 @@
 using PotionCraft.ObjectBased.Potion;
 using PotionCraft.ObjectBased.UIElements.Bookmarks;
 using PotionCraft.ScriptableObjects;
+using PotionCraft.ScriptableObjects.Potion;
 using PotionCraftRecipeWaypoints.Scripts.Storage;
 using PotionCraftRecipeWaypoints.Scripts.UIComponents;
 using System.Collections.Generic;

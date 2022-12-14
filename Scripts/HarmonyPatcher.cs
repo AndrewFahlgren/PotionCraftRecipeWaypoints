@@ -11,7 +11,7 @@ using PotionCraft.ObjectBased.UIElements.FinishLegendarySubstanceMenu;
 using PotionCraft.ObjectBased.UIElements.Tooltip;
 using PotionCraft.SaveFileSystem;
 using PotionCraft.SaveLoadSystem;
-using PotionCraft.ScriptableObjects;
+using PotionCraft.ScriptableObjects.Potion;
 using PotionCraftRecipeWaypoints.Scripts.Services;
 using System;
 using System.Collections.Generic;

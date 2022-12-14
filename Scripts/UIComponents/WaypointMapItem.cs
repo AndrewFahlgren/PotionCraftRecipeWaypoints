@@ -1,6 +1,7 @@
 ﻿using PotionCraft.Core.Cursor;
 using PotionCraft.ManagersSystem;
 using PotionCraft.ObjectBased.InteractiveItem;
+using PotionCraft.ObjectBased.RecipeMap;
 using PotionCraft.ObjectBased.UIElements.Tooltip;
 using PotionCraftRecipeWaypoints.Scripts.Services;
 using UnityEngine;

@@ -7,11 +7,18 @@ using System.Linq;
 using PotionCraft.ManagersSystem;
 using PotionCraft.ScriptableObjects;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace PotionCraftRecipeWaypoints.Scripts.Services
 {
     public static class SaveLoadService
     {
+        private class IgnoredWaypointsDeserialized
+        {
+            [JsonProperty(StaticStorage.RecipeWaypointsJsonSaveName)]
+            public List<int> IgnoredWaypoints { get; set; }
+        }
+
         /// <summary>
         /// Postfix method for StoreIgnoredWaypointsPatch
         /// Stores ignored waypoints list at the end of the save file with a custom field name
@@ -69,44 +76,17 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 Plugin.PluginLogger.LogInfo("No existing ignored recipes found during load");
                 return true;
             }
-            //Determine the start of the list object containing the data
-            var startSavedIgnoredWaypointsIndex = stateJsonString.IndexOf('[', keyIndex);
-            if (startSavedIgnoredWaypointsIndex == -1)
+
+            //Deserialize the bookmark groups from json using our dummy class
+            var deserialized = JsonConvert.DeserializeObject<IgnoredWaypointsDeserialized>(stateJsonString, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+            if (deserialized.IgnoredWaypoints == null)
             {
-                Plugin.PluginLogger.LogInfo("Error: ignored waypoints are not formed correctly. No ignored waypoints will be loaded (bad start index).");
+                Plugin.PluginLogger.LogError("Error: An error occured during ignored recipie deserialization");
                 return true;
             }
 
-            //Find the closing bracket of the list
-            var endSavedIgnoredWaypointsIndex = GetEndJsonIndex(stateJsonString, startSavedIgnoredWaypointsIndex, true);
-            if (endSavedIgnoredWaypointsIndex >= stateJsonString.Length)
-            {
-                Plugin.PluginLogger.LogInfo("Error: ignored waypoints are not formed correctly. No ignored waypoints will be loaded (bad end index).");
-                return true;
-            }
+            StaticStorage.IgnoredWaypoints = deserialized.IgnoredWaypoints;
 
-            //Read through the list parsing each int manually since list deserialization is not supported in unity
-            var savedIgnoredWaypointsJson = stateJsonString.Substring(startSavedIgnoredWaypointsIndex, endSavedIgnoredWaypointsIndex - startSavedIgnoredWaypointsIndex);
-            if (savedIgnoredWaypointsJson.Length <= 2)
-            {
-                Plugin.PluginLogger.LogInfo("No existing ignored waypoints found during load");
-                return true;
-            }
-            var objectEndIndex = 0;
-            //Continue parsing list until we find a non-comma character after the parsed object
-            while (objectEndIndex == 0 || savedIgnoredWaypointsJson[objectEndIndex] != ',')
-            {
-                var objectStartIndex = objectEndIndex + 1;
-                objectEndIndex = savedIgnoredWaypointsJson.IndexOf(',', objectStartIndex);
-                var curIndexJson = savedIgnoredWaypointsJson.Substring(objectStartIndex, objectEndIndex - objectStartIndex);
-                if (!int.TryParse(curIndexJson, out int savedIndex))
-                {
-                    Plugin.PluginLogger.LogInfo("Error: ignored waypoints are not in sync with save file. Some ignored waypoints may have been loaded (failed to parse index).");
-                    break;
-                }
-
-                StaticStorage.IgnoredWaypoints.Add(savedIndex);
-            }
             return true;
         }
 

@@ -1,4 +1,4 @@
-﻿using PotionCraft.ScriptableObjects;
+﻿using PotionCraft.ScriptableObjects.Potion;
 using PotionCraftRecipeWaypoints.Scripts.Storage;
 using System;
 using System.Collections.Generic;

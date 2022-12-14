@@ -30,8 +30,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
-using static PotionCraft.SaveLoadSystem.ProgressState;
-using static PotionCraft.ScriptableObjects.Potion;
+using UnityEngine.SceneManagement;
 
 namespace PotionCraftRecipeWaypoints.Scripts.Services
 {
@@ -66,6 +65,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 
             var gameObject = new GameObject($"waypoint ({StaticStorage.Waypoints.Count})");
             gameObject.layer = LayerMask.NameToLayer("RecipeMapContent");
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByName(recipe.Recipe.potionBase.mapSceneName));
+            gameObject.transform.parent = GameObject.Find("MapItemsContainer").transform;
             var waypointMapItem = gameObject.AddComponent<WaypointMapItem>();
             typeof(PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.RecipeMapItem)
                 .GetField("canBeInteracted", BindingFlags.NonPublic | BindingFlags.Instance)
@@ -86,7 +87,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             waypointMapItem.circleCollider = collider;
             waypointMapItem.circleCollider.radius = 0.5f;
 
-            waypointMapItem.transform.parent = Managers.RecipeMap.currentMap.transform;
+            //waypointMapItem.transform.parent = Managers.RecipeMap.currentMap.transform;
             waypointMapItem.transform.localPosition = pos;
 
             waypointMapItem.Recipe = recipe;
@@ -105,7 +106,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         {
             var recipe = rightPageContent.currentPotion;
             if (!RecipeService.IsWaypointRecipe(recipe)) return true;
-            MapLoader.SelectMapIfNotSelected(recipe.potionBase);
+            MapStatesManager.SelectMapIfNotSelected(recipe.potionBase);
             Managers.RecipeMap.CenterMapOn(recipe.potionFromPanel.serializedPath.indicatorTargetPosition, true, 1.0f);
             Managers.Room.GoTo(RoomManager.RoomIndex.Laboratory, true);
             if (!StaticStorage.WaypointsVisible) ShowHideWaypoints(true);
@@ -347,13 +348,13 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static Vector2 GetEffectMapLocation(PotionEffect potionEffect, PotionBase potionBase)
         {
-            var map = MapLoader.loadedMaps.FirstOrDefault(m => m.potionBase.name == potionBase.name);
+            var map = MapStatesManager.MapStates.FirstOrDefault(m => m.potionBase.name == potionBase.name);
             if (map == null)
             {
                 Plugin.PluginLogger.LogError($"Error: failed to find map for potion base {potionBase.name}");
                 return Vector2.zero;
             }
-            var mapEffect = map.potionEffectsOnMap.FirstOrDefault(e => e.effect.name == potionEffect.name);
+            var mapEffect = map.potionEffectsOnMap.FirstOrDefault(e => e.Effect.name == potionEffect.name);
             return mapEffect.thisTransform.localPosition;
         }
 
