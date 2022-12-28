@@ -11,6 +11,8 @@ Check the path you will be working with if you continue brewing from the recipe 
 
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Waypoint%20path.png?raw=true)
 
+![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Recipe%20Waypoints%20Tailend%20Waypoints.png?raw=true)
+
 Toggle waypoint recipes on and off to ensure you are only seeing useful waypoints on the map:
 
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Show%20Hide%20All%20Waypoints.png?raw=true)
