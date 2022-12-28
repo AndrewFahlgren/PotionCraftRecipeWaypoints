@@ -32,7 +32,7 @@ If you are not sure where your Potion Craft steam directory is you can find out 
 - Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases/latest)
   - The contents of the BepInEx zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should see a `winhttp.dll` file and `BepInEx` folder alongside your `Potion Craft.exe`
-- Download and install [Recipe Waypoints](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/releases/)
+- Download and install [Recipe Waypoints](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/releases/latest/)
   - The contents of the RecipeWaypoints zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should have a `PotionCraftRecipeWaypoints.dll` file at `Potion Craft/BepInEx/plugins`
   
