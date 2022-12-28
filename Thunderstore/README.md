@@ -9,6 +9,9 @@ Easily figure out where your waypoint recipe will take you if you continue brewi
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/View%20waypoint%20on%20map.png?raw=true)
 
 
+![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Recipe%20Waypoints%20Tailend%20Waypoints.png?raw=true)
+
+
 Check the path you will be working with if you continue brewing from the recipe by hovering over the waypoint icon on the map. Never continue brewing a recipe just to find your path leads you strait into a wall again!
 
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Waypoint%20path.png?raw=true)
@@ -57,5 +60,6 @@ I am making a series of mods which make recipes easier to use. All of these mods
 
 [Alchemy Machine Recipes](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Alchemy_Machine_Recipes/) - Enables the save recipe button when making things with the alchemy machine. Make legendary stones and salts with the click of a button!
 
-[Pour Back In](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Pour_Back_In/) - Makes your potions work just like recipes. Pour potions back in the cauldron to continue where you left off. You can also finish potions before you add any effects so you can come back to them later just like a waypoint recipe.
+[Bookmark Organizer](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Bookmark_Organizer/) - Lets you organize your recipes into groups! Save space in your recipe book and find the recipe you are looking for faster!
 
+[Pour Back In](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Pour_Back_In/) - Makes your potions work just like recipes. Pour potions back in the cauldron to continue where you left off. You can also finish potions before you add any effects so you can come back to them later just like a waypoint recipe.

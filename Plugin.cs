@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace PotionCraftRecipeWaypoints
 {
-    [BepInPlugin(PLUGIN_GUID, "PotionCraftRecipeWaypoints", "0.5.0")]
+    [BepInPlugin(PLUGIN_GUID, "PotionCraftRecipeWaypoints", "1.0.5.1")]
     [BepInProcess("Potion Craft.exe")]
     public class Plugin : BaseUnityPlugin
     {
