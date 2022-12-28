@@ -9,12 +9,12 @@ Easily figure out where your waypoint recipe will take you if you continue brewi
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/View%20waypoint%20on%20map.png?raw=true)
 
 
-![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Recipe%20Waypoints%20Tailend%20Waypoints.png?raw=true)
-
-
 Check the path you will be working with if you continue brewing from the recipe by hovering over the waypoint icon on the map. Never continue brewing a recipe just to find your path leads you strait into a wall again!
 
 ![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Waypoint%20path.png?raw=true)
+
+
+![image](https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints/blob/master/Images/Recipe%20Waypoints%20Tailend%20Waypoints.png?raw=true)
 
 
 Toggle waypoint recipes on and off to ensure you are only seeing useful waypoints on the map:
