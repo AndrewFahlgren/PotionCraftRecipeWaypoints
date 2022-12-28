@@ -83,11 +83,13 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static Vector2 GetTailEndMapPositionForRecipe(Potion recipe)
         {
-            return recipe.potionFromPanel.serializedPath.fixedPathPoints
-                                                        .LastOrDefault(fpp => fpp.graphicsPoints?.Any() ?? false)
-                                                        ?.graphicsPoints
-                                                        ?.LastOrDefault() 
-                                                        ?? Vector2.zero;
+            var lastPathPoint = recipe.potionFromPanel.serializedPath.fixedPathPoints
+                                                                     .LastOrDefault(fpp => fpp.graphicsPoints?.Any() ?? false)
+                                                                     ?.graphicsPoints
+                                                                     ?.LastOrDefault() 
+                                                                     ?? Vector2.zero;
+            var offset = recipe.potionFromPanel.serializedPath.indicatorTargetPosition + recipe.potionFromPanel.serializedPath.pathPosition;
+            return new Vector2(lastPathPoint.x, lastPathPoint.y) + offset;
         }
 
 

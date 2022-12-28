@@ -209,7 +209,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 //Add a ghost indicator to the beginning of the path
                 var indicatorObject = Managers.RecipeMap.indicator.gameObject.transform.Find("Bottle");
                 var ghostIndicatorGameObject = UnityEngine.Object.Instantiate(indicatorObject, waypointMapItem.path.transform);
-                ghostIndicatorGameObject.transform.localPosition = indicatorPosition;
+                var indicatorOffset = serializedPath.indicatorTargetPosition + serializedPath.pathPosition;
+                ghostIndicatorGameObject.transform.localPosition = indicatorPosition - indicatorOffset;
                 var waypointMapItemColor = GetWaypointMapItemColor();
                 waypointMapItemColor = new Color(waypointMapItemColor.r, waypointMapItemColor.g, waypointMapItemColor.b, WaypointMapItem.WaypointAlpha / 2);
 
