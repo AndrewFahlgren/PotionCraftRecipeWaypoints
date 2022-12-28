@@ -16,6 +16,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
         public SpriteRenderer IconRenderer;
         public CircleCollider2D circleCollider;
         public GameObject path;
+        public bool IsTailEndWaypoint;
         private bool loadedPath;
 
         public void OnPrimaryCursorClick()
@@ -44,6 +45,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
                 loadedPath = true;
             }
             path.SetActive(hovered);
+            if (IsTailEndWaypoint)
+            {
+                IconRenderer.enabled = !hovered;
+            }
         }
     }
 }

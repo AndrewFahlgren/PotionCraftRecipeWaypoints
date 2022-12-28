@@ -42,9 +42,9 @@ namespace PotionCraftRecipeWaypoints.Scripts
     [HarmonyPatch(typeof(RecipeBook), "EraseRecipe")]
     public class DeleteWaypointOnRecipeDeletePatch
     {
-        static void Postfix(Potion potion)
+        static bool Prefix(Potion potion)
         {
-            Ex.RunSafe(() => RecipeService.RecipeDeletedFromBook(potion));
+            return Ex.RunSafe(() => RecipeService.RecipeDeletedFromBook(potion));
         }
     }
 

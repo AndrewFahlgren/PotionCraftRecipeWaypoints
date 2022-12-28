@@ -40,28 +40,54 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             return GetMapPositionForRecipe(recipe.Recipe);
         }
 
-        public static void RecipeDeletedFromBook(Potion recipe)
+        public static bool IsTailEndWaypoint(Potion recipe)
         {
-            RecipeDeleted(recipe);
-            var matchingWaypoint = StaticStorage.Waypoints.FirstOrDefault(w => w.Recipe.Recipe == recipe);
-            if (matchingWaypoint == null)
-            {
-                Plugin.PluginLogger.LogError("Error: unable to find saved waypoint for recipe deletion (RecipeDeletedFromBook)!");
-                return;
-            }
+            return GetMapPositionForRecipe(recipe, true) != GetMapPositionForRecipe(recipe);
+        }
+
+        public static bool RecipeDeletedFromBook(Potion recipe)
+        {
+            var recipeIndex = Managers.Potion.recipeBook.savedRecipes.IndexOf(recipe);
             //We don't want the next recipe that goes into this slot to be ignored so remove this index from the ignore list
-            if (StaticStorage.IgnoredWaypoints.Contains(matchingWaypoint.Recipe.Index))
+            if (StaticStorage.IgnoredWaypoints.Contains(recipeIndex))
             {
-                StaticStorage.IgnoredWaypoints.Remove(matchingWaypoint.Recipe.Index);
+                StaticStorage.IgnoredWaypoints.Remove(recipeIndex);
+                return true;
             }
+            //If this recipe is not ignored then make sure to delete the waypoint
+            RemoveWaypoint(recipe);
+            return true;
         }
 
         /// <summary>
         /// Returns the saved map position of the indicator for this recipe
         /// </summary>
-        public static Vector2 GetMapPositionForRecipe(Potion recipe)
+        public static Vector2 GetMapPositionForRecipe(Potion recipe, bool forceReturnIndicatorPosition = false)
         {
-            return recipe.potionFromPanel.serializedPath.indicatorTargetPosition;
+            var pos = recipe.potionFromPanel.serializedPath.indicatorTargetPosition;
+            if (forceReturnIndicatorPosition) return pos;
+
+            //Return the tail end location for tail end waypoints
+            var exclusionZone = GetWaypointExclusionZone();
+            //Tail end waypoints include waypoints which are too close to the center to display or those which have a very long path already added
+            if (Vector2.Distance(Vector2.zero, pos) < exclusionZone || HasLongRemainingPath(recipe))
+            {
+                pos = GetTailEndMapPositionForRecipe(recipe);
+            }
+
+            return pos;
+        }
+
+        /// <summary>
+        /// Returns the saved map position of the indicator for this recipe
+        /// </summary>
+        public static Vector2 GetTailEndMapPositionForRecipe(Potion recipe)
+        {
+            return recipe.potionFromPanel.serializedPath.fixedPathPoints
+                                                        .LastOrDefault(fpp => fpp.graphicsPoints?.Any() ?? false)
+                                                        ?.graphicsPoints
+                                                        ?.LastOrDefault() 
+                                                        ?? Vector2.zero;
         }
 
 
@@ -88,14 +114,14 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// Postfix method for RecipeDeletedPatch
         /// Finds and removes the waypoint for the deleted recipe if there was a waypoint for that recipe
         /// </summary>
-        public static void RecipeDeleted(Potion recipe)
+        public static void RemoveWaypoint(Potion recipe)
         {
             var matchingWaypoint = StaticStorage.Waypoints.FirstOrDefault(w => w.Recipe.Recipe == recipe);
             if (matchingWaypoint == null)
             {
-                Plugin.PluginLogger.LogError("Error: unable to find saved waypoint for recipe deletion!");
                 return;
             }
+            UIService.AddMissingWaypointsAroundDeletedWaypoint(matchingWaypoint);
             UIService.DeleteWaypoint(matchingWaypoint);
         }
 
@@ -136,17 +162,34 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// if false this method will return false if the recipe is in the ignore list</param>
         public static bool IsWaypointRecipe(Potion recipe, bool returnIgnored = false)
         {
-            const int waypointGenerationDistance = 5;
             if (recipe == null) return false;
             if (!returnIgnored && StaticStorage.IgnoredWaypoints.Contains(Managers.Potion.recipeBook.savedRecipes.IndexOf(recipe))) return false;
             if (IsLegendaryRecipe(recipe)) return false;
-            var recipeMapPosition = GetMapPositionForRecipe(recipe);
+            var recipeMapPosition = GetMapPositionForRecipe(recipe, true);
+            var exclusionZone = GetWaypointExclusionZone();
             //Don't make waypoints within 5 indicator diameters of the center
-            if (Vector2.Distance(Vector2.zero, recipeMapPosition) < UIService.GetIndicatorDiameter() * waypointGenerationDistance) return false;
+            if (Vector2.Distance(Vector2.zero, recipeMapPosition) < exclusionZone)
+            {
+                //If this is a waypoint close to the center then check to see if the tail end of the path is far enough away to still count as a waypoint.
+                return Vector2.Distance(Vector2.zero, GetTailEndMapPositionForRecipe(recipe)) > exclusionZone;
+            }
             if (recipe.Effects.Length == 0 || recipe.Effects[0] == null) return true;
             var distanceToEffect = Vector2.Distance(recipeMapPosition, UIService.GetEffectMapLocation(recipe.Effects.Last(), recipe.potionBase));
-            if (distanceToEffect >= UIService.GetIndicatorDiameter() * waypointGenerationDistance) return true;
+            if (distanceToEffect >= exclusionZone) return true;
+            if (HasLongRemainingPath(recipe)) return true;
             return false;
+        }
+
+        private static bool HasLongRemainingPath(Potion recipe)
+        {
+            return recipe.potionFromPanel.serializedPath.fixedPathPoints.Count > 1;
+        }
+
+        public static float GetWaypointExclusionZone()
+        {
+            const int waypointGenerationDistance = 5;
+            var exclusionZone = UIService.GetIndicatorDiameter() * waypointGenerationDistance;
+            return exclusionZone;
         }
 
         /// <summary>
@@ -173,7 +216,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             else
             {
                 StaticStorage.IgnoredWaypoints.Add(recipe.Index);
-                RecipeDeleted(recipe.Recipe);
+                RemoveWaypoint(recipe.Recipe);
             }
             UIService.UpdateCurrentRecipePage();
         }

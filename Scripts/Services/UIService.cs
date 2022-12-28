@@ -7,6 +7,7 @@ using PotionCraft.ObjectBased.InteractiveItem;
 using PotionCraft.ObjectBased.RecipeMap;
 using PotionCraft.ObjectBased.RecipeMap.Buttons;
 using PotionCraft.ObjectBased.RecipeMap.Path;
+using PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.IndicatorMapItem;
 using PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PathMapItem;
 using PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.Teleportation;
 using PotionCraft.ObjectBased.UIElements;
@@ -39,6 +40,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
     /// </summary>
     public static class UIService
     {
+        private const float WaypointProximityExclusionZone = 1f;
+
         /// <summary>
         /// Adds waypoints for the specified waypoint recipes to the map
         /// </summary>
@@ -52,12 +55,29 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         }
 
         /// <summary>
+        /// Adds in waypoints which may not have been added due to proximity with this waypoint.
+        /// </summary>
+        /// <param name="deletedWaypoint">The waypoint which is being deleted.</param>
+        public static void AddMissingWaypointsAroundDeletedWaypoint(WaypointMapItem deletedWaypoint)
+        {
+            if (deletedWaypoint.Recipe.Recipe.potionBase != GetCurrentPotionBase()) return;
+            var pos = deletedWaypoint.transform.position;
+            var allNearbyWaypointRecipes = RecipeService.GetWaypointRecipes(deletedWaypoint.Recipe.Recipe.potionBase)
+                                                        .Where(r => Vector2.Distance(pos, RecipeService.GetMapPositionForRecipe(r)) <= WaypointProximityExclusionZone);
+            var waypointsToAdd = allNearbyWaypointRecipes.Where(r => StaticStorage.Waypoints.Any(w => w.Recipe.Index == r.Index)).ToList();
+            waypointsToAdd.ForEach(recipe =>
+            {
+                AddWaypointToMap(recipe);
+            });
+        }
+
+        /// <summary>
         /// Adds a waypoint to the map for the specified recipe
         /// </summary>
         public static void AddWaypointToMap(RecipeIndex recipe)
         {
             var pos = RecipeService.GetMapPositionForRecipe(recipe);
-            if (StaticStorage.Waypoints.Any(w => Vector2.Distance(w.transform.localPosition, pos) < 1))
+            if (StaticStorage.Waypoints.Any(w => Vector2.Distance(w.transform.localPosition, pos) < WaypointProximityExclusionZone))
             {
                 Plugin.PluginLogger.LogInfo($"Waypoint not added to map due to proximity to existing waypoint: {recipe.Recipe.GetLocalizedTitle()}");
                 return;
@@ -68,6 +88,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByName(recipe.Recipe.potionBase.mapSceneName));
             gameObject.transform.parent = GameObject.Find("MapItemsContainer").transform;
             var waypointMapItem = gameObject.AddComponent<WaypointMapItem>();
+            waypointMapItem.IsTailEndWaypoint = RecipeService.GetMapPositionForRecipe(recipe.Recipe, true) != pos;
             typeof(PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.RecipeMapItem)
                 .GetField("canBeInteracted", BindingFlags.NonPublic | BindingFlags.Instance)
                 .SetValue(waypointMapItem, true);
@@ -107,7 +128,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             var recipe = rightPageContent.currentPotion;
             if (!RecipeService.IsWaypointRecipe(recipe)) return true;
             MapStatesManager.SelectMapIfNotSelected(recipe.potionBase);
-            Managers.RecipeMap.CenterMapOn(recipe.potionFromPanel.serializedPath.indicatorTargetPosition, true, 1.0f);
+            var pos = RecipeService.GetMapPositionForRecipe(recipe);
+            Managers.RecipeMap.CenterMapOn(pos, true, 1.0f);
             Managers.Room.GoTo(RoomManager.RoomIndex.Laboratory, true);
             if (!StaticStorage.WaypointsVisible) ShowHideWaypoints(true);
             return false;
@@ -126,6 +148,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             //Teleportation hints have a lot of bad side effects and aren't probably going to be encountered anyways. For now they can just be unsupported.
             if (fixedPathPoints.Any(p => p.isTeleportationHint)) return;
             var fixedPathHints = new List<FixedHint>();
+            var isFirst = true;
             fixedPathPoints.Select(f => f.Clone()).ToList().ForEach(points =>
             {
                 var component = UnityEngine.Object.Instantiate(pathSettings.nonTeleportationFixedHint, waypointMapItem.path.transform).GetComponent<FixedHint>();
@@ -135,18 +158,26 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 component.SetPathStartParameters(points.pathStartParameters);
                 component.SetPathEndParameters(points.pathEndParameters);
                 var oldActualPathFixedPathHints = Managers.RecipeMap.path.fixedPathHints;
-                var oldDeletedGraphicsSegments = Managers.RecipeMap.path.deletedGraphicsSegments; //TODO there are a bunch of these fields. Test with void salt to make sure we don't need the others
+                var oldDeletedGraphicsSegments = Managers.RecipeMap.path.deletedGraphicsSegments;
                 component.UpdateState(PathMapItem.State.Showing, 0f);
                 component.ShowPathEnds(true, 0f);
 
+                var deletedSegments = serializedPath.deletedGraphicsSegments;
+                if (isFirst)
+                {
+                    isFirst = false;
+                    deletedSegments += 1;
+                }
+
                 Managers.RecipeMap.path.fixedPathHints = fixedPathHints;
-                Managers.RecipeMap.path.deletedGraphicsSegments = serializedPath.deletedGraphicsSegments;
+                Managers.RecipeMap.path.deletedGraphicsSegments = deletedSegments;
                 component.MakePathVisible();
                 Managers.RecipeMap.path.fixedPathHints = oldActualPathFixedPathHints;
                 Managers.RecipeMap.path.deletedGraphicsSegments = oldDeletedGraphicsSegments;
 
                 fixedPathHints.Add(component);
             });
+
             var oldActualPathFixedPathHints = Managers.RecipeMap.path.fixedPathHints;
             var oldDeletedGraphicsSegments = Managers.RecipeMap.path.deletedGraphicsSegments;
 
@@ -154,16 +185,72 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             Managers.RecipeMap.path.deletedGraphicsSegments = serializedPath.deletedGraphicsSegments;
             var updatePathAlphaMethod = typeof(NonTeleportationFixedHint).GetMethod("UpdatePathAlpha", BindingFlags.NonPublic | BindingFlags.Instance);
             var updatePathAlphaEndMethod = typeof(NonTeleportationFixedHint).GetMethod("UpdatePathEndAlpha", BindingFlags.NonPublic | BindingFlags.Instance);
-            fixedPathHints.ForEach(f =>
+            for (var i = 0; i < fixedPathHints.Count; i++)
             {
+                var f = fixedPathHints[i];
                 f.MakePathVisible();
                 updatePathAlphaMethod.Invoke(f, new object[] { WaypointMapItem.WaypointAlpha });
-                updatePathAlphaEndMethod.Invoke(f, new object[] { WaypointMapItem.WaypointAlpha });
-            });
+                //Only show the path end for the last fixed path
+                updatePathAlphaEndMethod.Invoke(f, new object[] { i == fixedPathHints.Count - 1 ? WaypointMapItem.WaypointAlpha : 0 });
+            }
             Managers.RecipeMap.path.fixedPathHints = oldActualPathFixedPathHints;
             Managers.RecipeMap.path.deletedGraphicsSegments = oldDeletedGraphicsSegments;
 
-            waypointMapItem.path.transform.localPosition = serializedPath.pathPosition;
+            var indicatorPosition = RecipeService.GetMapPositionForRecipe(waypointMapItem.Recipe.Recipe, true);
+            var waypointPosition = RecipeService.GetMapPositionForRecipe(waypointMapItem.Recipe.Recipe);
+            var positionOffset = waypointMapItem.IsTailEndWaypoint
+                                    ? indicatorPosition - waypointPosition
+                                    : Vector2.zero;
+            waypointMapItem.path.transform.localPosition = serializedPath.pathPosition + positionOffset;
+            
+            //Make some adjustments to the path for tail end waypoints
+            if (waypointMapItem.IsTailEndWaypoint)
+            {
+                //Add a ghost indicator to the beginning of the path
+                var indicatorObject = Managers.RecipeMap.indicator.gameObject.transform.Find("Bottle");
+                var ghostIndicatorGameObject = UnityEngine.Object.Instantiate(indicatorObject, waypointMapItem.path.transform);
+                ghostIndicatorGameObject.transform.localPosition = indicatorPosition;
+                var waypointMapItemColor = GetWaypointMapItemColor();
+                waypointMapItemColor = new Color(waypointMapItemColor.r, waypointMapItemColor.g, waypointMapItemColor.b, WaypointMapItem.WaypointAlpha / 2);
+
+                var background = ghostIndicatorGameObject.transform.Find("Background").GetComponent<SpriteRenderer>();
+                var spritesToUpdate = new List<SpriteRenderer>
+                {
+                    background,
+                    ghostIndicatorGameObject.transform.Find("Liquid Sprites Container/Sprite Liquid Main").GetComponent<SpriteRenderer>(),
+                    ghostIndicatorGameObject.transform.Find("Liquid Sprites Container(Clone)/Sprite Liquid Main").GetComponent<SpriteRenderer>(),
+                    ghostIndicatorGameObject.transform.Find("Foreground").GetComponent<SpriteRenderer>(),
+                    ghostIndicatorGameObject.transform.Find("Contour").GetComponent<SpriteRenderer>()
+                };
+
+                //Update the sprites to be the semi transparent color we use for waypoints with some additional alpha
+                //Also update all the sorting groups for the ghost indicator to ensure it sorts above the path
+                var fixedPathSprite = fixedPathHints.First().GetComponentInChildren<LineRenderer>();
+                spritesToUpdate.ForEach(sprite =>
+                {
+                    if (sprite != background) sprite.color = waypointMapItemColor;
+                    sprite.sortingLayerName = fixedPathSprite.sortingLayerName;
+                    sprite.sortingOrder = fixedPathSprite.sortingOrder + sprite.sortingOrder;
+                });
+
+                var sortingGroupsToUpdate = new List<SortingGroup>
+                {
+                    ghostIndicatorGameObject.transform.Find("Liquid Sprites Container").GetComponent<SortingGroup>(),
+                    ghostIndicatorGameObject.transform.Find("Liquid Sprites Container(Clone)").GetComponent<SortingGroup>()
+                };
+
+                sortingGroupsToUpdate.ForEach(group =>
+                {
+                    group.sortingLayerName = fixedPathSprite.sortingLayerName;
+                    group.sortingOrder = fixedPathSprite.sortingOrder + group.sortingOrder;
+                });
+
+
+                //Hide the cork
+                ghostIndicatorGameObject.transform.Find("Cork").gameObject.SetActive(false);
+                //Hide the scratches
+                ghostIndicatorGameObject.transform.Find("Scratches").gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
