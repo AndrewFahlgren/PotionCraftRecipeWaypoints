@@ -1,4 +1,5 @@
 ﻿using PotionCraft.Assemblies.GamepadNavigation;
+using PotionCraft.Core.Extensions;
 using PotionCraft.ManagersSystem;
 using PotionCraft.ManagersSystem.RecipeMap;
 using PotionCraft.ManagersSystem.Room;
@@ -211,6 +212,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 var ghostIndicatorGameObject = UnityEngine.Object.Instantiate(indicatorObject, waypointMapItem.path.transform);
                 var indicatorOffset = serializedPath.indicatorTargetPosition + serializedPath.pathPosition;
                 ghostIndicatorGameObject.transform.localPosition = indicatorPosition - indicatorOffset;
+
+                //Set the rotation
+                ghostIndicatorGameObject.transform.eulerAngles = serializedPath.indicatorRotationValue.RecalculateEulerAngle(FloatExtension.AngleType.ZeroTo2Pi) * Vector3.forward;
+
                 var waypointMapItemColor = GetWaypointMapItemColor();
                 waypointMapItemColor = new Color(waypointMapItemColor.r, waypointMapItemColor.g, waypointMapItemColor.b, WaypointMapItem.WaypointAlpha / 2);
 
