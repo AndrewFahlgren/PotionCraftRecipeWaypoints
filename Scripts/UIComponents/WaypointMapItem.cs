@@ -21,7 +21,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
 
         public void OnPrimaryCursorClick()
         {
-            Managers.Potion.recipeBook.OpenPageAt(Recipe.Index);
+            RecipeService.OpenPageOnWaypointClick(this);
         }
 
         public bool OnPrimaryCursorRelease()

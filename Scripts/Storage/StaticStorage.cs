@@ -15,6 +15,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Storage
         //The list of all waypoints which have been ignored by the user
         public static List<int> IgnoredWaypoints = new();
 
+        //Temporary waypoints created if the BrewFromHere mod is also installed
+        public static WaypointMapItem TemporaryWaypoint;
+
         //The main map waypoint toggle button
         public static WaypointToggleButton WaypointToggleButton;
         //The recipe waypoint toggle button for each right page instance
@@ -35,5 +38,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Storage
 
         //Used only during save for a short period of time
         public static string StateJsonString;
+
+        public static bool BrewFromHereInstalled;
     }
 }

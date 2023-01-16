@@ -32,6 +32,17 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             SaveLoadService.LoadWaypoints();
         }
 
+        public static void OpenPageOnWaypointClick(WaypointMapItem waypoint)
+        {
+            if (StaticStorage.BrewFromHereInstalled 
+                && waypoint != StaticStorage.TemporaryWaypoint)
+            {
+                //In this case a bit of logic needs to be done to ensure BrewFromHere resets the saved recipe mark index
+                Managers.Potion.recipeBook.onPageChanged.Invoke(Managers.Potion.recipeBook.currentPageIndex, waypoint.Recipe.Index);
+            }
+            Managers.Potion.recipeBook.OpenPageAt(waypoint.Recipe.Index);
+        }
+
         /// <summary>
         /// Returns the saved map position of the indicator for this recipe
         /// </summary>

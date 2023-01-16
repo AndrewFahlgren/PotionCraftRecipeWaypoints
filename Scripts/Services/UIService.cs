@@ -75,13 +75,13 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// <summary>
         /// Adds a waypoint to the map for the specified recipe
         /// </summary>
-        public static void AddWaypointToMap(RecipeIndex recipe)
+        public static WaypointMapItem AddWaypointToMap(RecipeIndex recipe, bool addToWaypointList = true)
         {
             var pos = RecipeService.GetMapPositionForRecipe(recipe);
             if (StaticStorage.Waypoints.Any(w => Vector2.Distance(w.transform.localPosition, pos) < WaypointProximityExclusionZone))
             {
                 Plugin.PluginLogger.LogInfo($"Waypoint not added to map due to proximity to existing waypoint: {recipe.Recipe.GetLocalizedTitle()}");
-                return;
+                return null;
             }
 
             var gameObject = new GameObject($"waypoint ({StaticStorage.Waypoints.Count})");
@@ -113,11 +113,10 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             waypointMapItem.transform.localPosition = pos;
 
             waypointMapItem.Recipe = recipe;
-            StaticStorage.Waypoints.Add(waypointMapItem);
-
+            if (addToWaypointList) StaticStorage.Waypoints.Add(waypointMapItem);
             if (!StaticStorage.WaypointsVisible) gameObject.SetActive(false);
 
-            Plugin.PluginLogger.LogInfo($"Added waypoint: {recipe.Recipe.GetLocalizedTitle()} at {waypointMapItem.transform.localPosition}");
+            return waypointMapItem;
         }
 
         /// <summary>
@@ -309,6 +308,13 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static void ModifyBrewPotionButtonForWaypointRecipes(RecipeBookBrewPotionButton instance, RecipeBookRightPageContent rightPageContent)
         {
+            if (StaticStorage.TemporaryWaypoint != null)
+            {
+                UnityEngine.Object.Destroy(StaticStorage.TemporaryWaypoint.gameObject);
+            }
+            StaticStorage.TemporaryWaypoint = null;
+
+
             const float recipeIconScaleFactor = 0.65f;
 
             CreateRecipeBookWaypointToggleButton(rightPageContent);
@@ -337,6 +343,13 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 instance.gameObject.SetActive(false);
                 var canPress = rightPageContent.currentPotion?.potionBase?.name == GetCurrentPotionBase().name || !Managers.Potion.potionCraftPanel.IsPotionBrewingStarted();
                 StaticStorage.WaypointBrewPotionButton[rightPageContent].Locked = !canPress;
+
+                //If BrewFromhere is installed we should create temporary waypoints when a new recipe is generated
+                if (StaticStorage.BrewFromHereInstalled)
+                {
+                    var currentIndex = Managers.Potion.recipeBook.currentPageIndex;
+                    StaticStorage.TemporaryWaypoint = AddWaypointToMap(new RecipeIndex { Index = currentIndex, Recipe = rightPageContent.currentPotion }, false);
+                }
             }
             else
             {
@@ -543,6 +556,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             StaticStorage.Waypoints.ForEach(w => w.gameObject.SetActive(show));
             StaticStorage.WaypointsVisible = show;
             UpdateWaypointToggleButtonSprite();
+
+            if (StaticStorage.TemporaryWaypoint != null) StaticStorage.TemporaryWaypoint.gameObject.SetActive(show);
         }
 
         /// <summary>
