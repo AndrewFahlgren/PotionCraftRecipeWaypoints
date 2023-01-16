@@ -58,3 +58,5 @@ I am making a series of mods which make recipes easier to use. All of these mods
 [Bookmark Organizer](https://github.com/AndrewFahlgren/PotionCraftBookmarkOrganizer) - Lets you organize your recipes into groups! Save space in your recipe book and find the recipe you are looking for faster!
 
 [Pour Back In](https://github.com/AndrewFahlgren/PotionCraftPourBackIn) - Makes your potions work just like recipes. Pour potions back in the cauldron to continue where you left off. You can also finish potions before you add any effects so you can come back to them later just like a waypoint recipe.
+
+[Brew From Here](https://github.com/AndrewFahlgren/PotionCraftUsefulRecipeMarks) - Lets you continue brewing from any recipe mark.
