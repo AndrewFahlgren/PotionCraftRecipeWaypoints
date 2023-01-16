@@ -143,28 +143,34 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static void RecipeAdded()
         {
-            var existingWaypointIndexes = StaticStorage.Waypoints.Select(w => w.Recipe.Index).ToList();
-            var newRecipe = GetWaypointRecipes(UIService.GetCurrentPotionBase()).FirstOrDefault(p => !existingWaypointIndexes.Contains(p.Index));
-            if (newRecipe == null) return;
-            UIService.AddWaypointToMap(newRecipe);
+            Ex.RunSafe(() =>
+            {
+                var existingWaypointIndexes = StaticStorage.Waypoints.Select(w => w.Recipe.Index).ToList();
+                var newRecipe = GetWaypointRecipes(UIService.GetCurrentPotionBase()).FirstOrDefault(p => !existingWaypointIndexes.Contains(p.Index));
+                if (newRecipe == null) return;
+                UIService.AddWaypointToMap(newRecipe);
+            });
         }
 
         private static void BookmarksRearranged(BookmarkController bookmarksController, List<int> intList)
         {
-            var oldIgnored = StaticStorage.IgnoredWaypoints.ToList();
-            var newIgnored = new List<int>();
-            var oldWaypointIndexes = StaticStorage.Waypoints.Select(w => new { waypoint = w, oldIndex = w.Recipe.Index}).ToList();
-            for (var newIndex = 0; newIndex < intList.Count; newIndex++)
+            Ex.RunSafe(() =>
             {
-                var oldIndex = intList[newIndex];
-                //This will recreate the old ignored list making sure to update any indexes along the way
-                if (oldIgnored.Contains(oldIndex)) newIgnored.Add(newIndex);
-                if (intList[newIndex] == newIndex) continue;
-                var affectedWaypoint = oldWaypointIndexes.FirstOrDefault(w => w.oldIndex == oldIndex);
-                if (affectedWaypoint == null) continue;
-                affectedWaypoint.waypoint.Recipe.Index = newIndex;
-            }
-            StaticStorage.IgnoredWaypoints = newIgnored;
+                var oldIgnored = StaticStorage.IgnoredWaypoints.ToList();
+                var newIgnored = new List<int>();
+                var oldWaypointIndexes = StaticStorage.Waypoints.Select(w => new { waypoint = w, oldIndex = w.Recipe.Index }).ToList();
+                for (var newIndex = 0; newIndex < intList.Count; newIndex++)
+                {
+                    var oldIndex = intList[newIndex];
+                    //This will recreate the old ignored list making sure to update any indexes along the way
+                    if (oldIgnored.Contains(oldIndex)) newIgnored.Add(newIndex);
+                    if (intList[newIndex] == newIndex) continue;
+                    var affectedWaypoint = oldWaypointIndexes.FirstOrDefault(w => w.oldIndex == oldIndex);
+                    if (affectedWaypoint == null) continue;
+                    affectedWaypoint.waypoint.Recipe.Index = newIndex;
+                }
+                StaticStorage.IgnoredWaypoints = newIgnored;
+            });
         }
 
         /// <summary>
