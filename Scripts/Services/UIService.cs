@@ -125,7 +125,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static bool ViewWaypointOnMap(RecipeBookRightPageContent rightPageContent)
         {
-            var recipe = rightPageContent.currentPotion;
+            var recipe = rightPageContent.pageContentPotion;
             if (!RecipeService.IsWaypointRecipe(recipe)) return true;
             MapStatesManager.SelectMapIfNotSelected(recipe.potionBase);
             var pos = RecipeService.GetMapPositionForRecipe(recipe);
@@ -266,7 +266,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         {
             Managers.Potion.recipeBook.GetComponentsInChildren<RecipeBookRightPageContent>().ToList().ForEach(rightPageContent =>
             {
-                rightPageContent.UpdatePage(rightPageContent.currentState, rightPageContent.currentPotion);
+                rightPageContent.UpdatePage(rightPageContent.currentState, rightPageContent.pageContentPotion);
             });
         }
 
@@ -318,7 +318,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             const float recipeIconScaleFactor = 0.65f;
 
             CreateRecipeBookWaypointToggleButton(rightPageContent);
-            var isWaypointRecipe = RecipeService.IsWaypointRecipe(rightPageContent.currentPotion);
+            var isWaypointRecipe = RecipeService.IsWaypointRecipe(rightPageContent.pageContentPotion);
             if (isWaypointRecipe)
             {
                 if (!StaticStorage.WaypointBrewPotionButton.ContainsKey(rightPageContent))
@@ -341,14 +341,14 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 }
                 StaticStorage.WaypointBrewPotionButton[rightPageContent].gameObject.SetActive(true);
                 instance.gameObject.SetActive(false);
-                var canPress = rightPageContent.currentPotion?.potionBase?.name == GetCurrentPotionBase().name || !Managers.Potion.potionCraftPanel.IsPotionBrewingStarted();
+                var canPress = rightPageContent.pageContentPotion?.potionBase?.name == GetCurrentPotionBase().name || !Managers.Potion.potionCraftPanel.IsPotionBrewingStarted();
                 StaticStorage.WaypointBrewPotionButton[rightPageContent].Locked = !canPress;
 
                 //If BrewFromhere is installed we should create temporary waypoints when a new recipe is generated
                 if (StaticStorage.BrewFromHereInstalled)
                 {
                     var currentIndex = Managers.Potion.recipeBook.currentPageIndex;
-                    StaticStorage.TemporaryWaypoint = AddWaypointToMap(new RecipeIndex { Index = currentIndex, Recipe = rightPageContent.currentPotion }, false);
+                    StaticStorage.TemporaryWaypoint = AddWaypointToMap(new RecipeIndex { Index = currentIndex, Recipe = rightPageContent.pageContentPotion }, false);
                 }
             }
             else
@@ -432,11 +432,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 StaticStorage.WaypointToggleButtonRecipeBook[instance] = waypointButton;
             }
             var button = StaticStorage.WaypointToggleButtonRecipeBook[instance];
-            var isWaypointRecipeIgnoreIgnored = RecipeService.IsWaypointRecipe(instance.currentPotion, true);
+            var isWaypointRecipeIgnoreIgnored = RecipeService.IsWaypointRecipe(instance.pageContentPotion, true);
             button.gameObject.SetActive(isWaypointRecipeIgnoreIgnored);
             if (!isWaypointRecipeIgnoreIgnored) return;
             var color = GetWaypointSpriteColor();
-            button.iconRenderer.color = StaticStorage.IgnoredWaypoints.Contains(RecipeService.GetRecipeIndexObject(instance.currentPotion).Index)
+            button.iconRenderer.color = StaticStorage.IgnoredWaypoints.Contains(RecipeService.GetRecipeIndexObject(instance.pageContentPotion).Index)
                                             ? new Color(color.r, color.g, color.b, button.OffAlpha)
                                             : color;
         }

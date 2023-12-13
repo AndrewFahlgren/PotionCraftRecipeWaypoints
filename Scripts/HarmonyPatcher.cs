@@ -1,23 +1,14 @@
 ﻿using HarmonyLib;
-using PotionCraft.ManagersSystem.Potion;
 using PotionCraft.ManagersSystem.SaveLoad;
-using PotionCraft.ObjectBased.AlchemyMachine;
+using PotionCraft.ObjectBased.InteractiveItem;
 using PotionCraft.ObjectBased.RecipeMap;
-using PotionCraft.ObjectBased.RecipeMap.Buttons;
-using PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PathMapItem;
-using PotionCraft.ObjectBased.UIElements;
 using PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
-using PotionCraft.ObjectBased.UIElements.FinishLegendarySubstanceMenu;
 using PotionCraft.ObjectBased.UIElements.Tooltip;
 using PotionCraft.SaveFileSystem;
 using PotionCraft.SaveLoadSystem;
 using PotionCraft.ScriptableObjects.Potion;
 using PotionCraftRecipeWaypoints.Scripts.Services;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using TMPro;
-using UnityEngine;
 
 namespace PotionCraftRecipeWaypoints.Scripts
 {
@@ -69,8 +60,8 @@ namespace PotionCraftRecipeWaypoints.Scripts
         {
             try
             {
-                if (rightPageContent.currentPotion == null) return true;
-                if (!RecipeService.IsWaypointRecipe(rightPageContent.currentPotion)) return true;
+                if (rightPageContent.pageContentPotion == null) return true;
+                if (!RecipeService.IsWaypointRecipe(rightPageContent.pageContentPotion)) return true;
                 return false;
             }
             catch (Exception ex)
@@ -90,19 +81,21 @@ namespace PotionCraftRecipeWaypoints.Scripts
         }
     }
 
-    [HarmonyPatch(typeof(RecipeBookBrewPotionButton), "GetTooltipContent")]
+    [HarmonyPatch(typeof(TooltipContentProvider), "GetTooltipContent")]
     public class RemoveBrewPotionTooltipForWaypointRecipePatch
     {
-        static void Postfix(ref TooltipContent __result, RecipeBookRightPageContent ___rightPageContent)
+        static void Postfix(ref TooltipContent __result, InteractiveItem ___interactiveItem)
         {
             try
             {
-                if (RecipeService.IsWaypointRecipe(___rightPageContent.currentPotion))
+                if (___interactiveItem is not RecipeBookBrewPotionButton brewButton) return;
+                var rightPageContent = AccessTools.Field(brewButton.GetType(), "rightPageContent").GetValue(brewButton) as RecipeBookRightPageContent;
+                if (RecipeService.IsWaypointRecipe(rightPageContent.pageContentPotion))
                 {
                     __result = null;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Ex.LogException(ex);
             }
