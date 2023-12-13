@@ -81,13 +81,15 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             if (StaticStorage.Waypoints.Any(w => Vector2.Distance(w.transform.localPosition, pos) < WaypointProximityExclusionZone))
             {
                 Plugin.PluginLogger.LogInfo($"Waypoint not added to map due to proximity to existing waypoint: {recipe.Recipe.GetLocalizedTitle()}");
+                Plugin.PluginLogger.LogInfo($"{pos.x}-{pos.y}");
                 return null;
             }
 
             var gameObject = new GameObject($"waypoint ({StaticStorage.Waypoints.Count})");
             gameObject.layer = LayerMask.NameToLayer("RecipeMapContent");
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByName(recipe.Recipe.potionBase.mapSceneName));
-            gameObject.transform.parent = GameObject.Find("MapItemsContainer").transform;
+            var scene = SceneManager.GetSceneByName(recipe.Recipe.potionBase.mapSceneName);
+            SceneManager.MoveGameObjectToScene(gameObject, scene);
+            gameObject.transform.parent = scene.GetRootGameObjects().First(go => go.name == "MapItemsContainer").transform;
             var waypointMapItem = gameObject.AddComponent<WaypointMapItem>();
             waypointMapItem.IsTailEndWaypoint = RecipeService.GetMapPositionForRecipe(recipe.Recipe, true) != pos;
             typeof(PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.RecipeMapItem)
