@@ -1,5 +1,5 @@
 # Recipe Waypoints
-This is a Potion Craft mod to help with the managing of "waypoint" recipes.
+**This mod is not compatible with Potion Craft v2.0!! This mod is only compatible with Potion Craft v1.1 currently and is currently being updated to work with the newest version!**This is a Potion Craft mod to help with the managing of "waypoint" recipes.
 
 See the location on the map of your saved "waypoint" recipes. These include any recipes with no effects and any recipes which are far away from their last gathered effect.
 
