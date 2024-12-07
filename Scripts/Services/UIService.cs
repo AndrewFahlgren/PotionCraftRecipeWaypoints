@@ -1,9 +1,13 @@
-﻿using PotionCraft.Assemblies.GamepadNavigation;
+﻿using HarmonyLib;
+using PathSystem;
+using PotionCraft.Assemblies.GamepadNavigation;
 using PotionCraft.Core.Extensions;
 using PotionCraft.ManagersSystem;
+using PotionCraft.ManagersSystem.Game.Providers;
 using PotionCraft.ManagersSystem.RecipeMap;
 using PotionCraft.ManagersSystem.Room;
 using PotionCraft.ManagersSystem.TMP;
+using PotionCraft.ObjectBased;
 using PotionCraft.ObjectBased.InteractiveItem;
 using PotionCraft.ObjectBased.RecipeMap;
 using PotionCraft.ObjectBased.RecipeMap.Buttons;
@@ -15,9 +19,9 @@ using PotionCraft.ObjectBased.UIElements;
 using PotionCraft.ObjectBased.UIElements.Books;
 using PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
 using PotionCraft.ObjectBased.UIElements.FinishLegendarySubstanceMenu;
-using PotionCraft.ObjectBased.UIElements.Tooltip;
 using PotionCraft.ScriptableObjects;
 using PotionCraft.ScriptableObjects.AlchemyMachineProducts;
+using PotionCraft.ScriptableObjects.Potion;
 using PotionCraft.Settings;
 using PotionCraft.TMPAtlasGenerationSystem;
 using PotionCraft.Utils.SortingOrderSetter;
@@ -29,7 +33,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using TMPro;
+using TooltipSystem;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
@@ -80,14 +86,14 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             var pos = RecipeService.GetMapPositionForRecipe(recipe);
             if (StaticStorage.Waypoints.Any(w => Vector2.Distance(w.transform.localPosition, pos) < WaypointProximityExclusionZone))
             {
-                Plugin.PluginLogger.LogInfo($"Waypoint not added to map due to proximity to existing waypoint: {recipe.Recipe.GetLocalizedTitle()}");
+                Plugin.PluginLogger.LogInfo($"Waypoint not added to map due to proximity to existing waypoint: {recipe.Recipe.GetLocalizedTitleText()}");
                 Plugin.PluginLogger.LogInfo($"{pos.x}-{pos.y}");
                 return null;
             }
 
             var gameObject = new GameObject($"waypoint ({StaticStorage.Waypoints.Count})");
             gameObject.layer = LayerMask.NameToLayer("RecipeMapContent");
-            var scene = SceneManager.GetSceneByName(recipe.Recipe.potionBase.mapSceneName);
+            var scene = SceneManager.GetSceneByBuildIndex((int)recipe.Recipe.potionBase.GetSceneIndexEnum());
             SceneManager.MoveGameObjectToScene(gameObject, scene);
             gameObject.transform.parent = scene.GetRootGameObjects().First(go => go.name == "MapItemsContainer").transform;
             var waypointMapItem = gameObject.AddComponent<WaypointMapItem>();
@@ -127,12 +133,12 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static bool ViewWaypointOnMap(RecipeBookRightPageContent rightPageContent)
         {
-            var recipe = rightPageContent.pageContentPotion;
+            var recipe = rightPageContent.GetRecipeBookPageContent() as Potion;
             if (!RecipeService.IsWaypointRecipe(recipe)) return true;
             MapStatesManager.SelectMapIfNotSelected(recipe.potionBase);
             var pos = RecipeService.GetMapPositionForRecipe(recipe);
             Managers.RecipeMap.CenterMapOn(pos, true, 1.0f);
-            Managers.Room.GoTo(RoomManager.RoomIndex.Laboratory, true);
+            Managers.Room.GoTo(RoomIndex.Laboratory, true);
             if (!StaticStorage.WaypointsVisible) ShowHideWaypoints(true);
             return false;
         }
@@ -145,7 +151,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             waypointMapItem.path = new GameObject("WaypointPath");
             waypointMapItem.path.transform.parent = waypointMapItem.transform;
             var pathSettings = Settings<RecipeMapManagerPathSettings>.Asset;
-            var serializedPath = waypointMapItem.Recipe.Recipe.potionFromPanel.serializedPath;
+            var serializedPath = ((SerializedPotionRecipeData)waypointMapItem.Recipe.Recipe.GetSerializedRecipeData()).serializedPath;
             var fixedPathPoints = serializedPath.fixedPathPoints;
             //Teleportation hints have a lot of bad side effects and aren't probably going to be encountered anyways. For now they can just be unsupported.
             if (fixedPathPoints.Any(p => p.isTeleportationHint)) return;
@@ -191,9 +197,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             {
                 var f = fixedPathHints[i];
                 f.MakePathVisible();
-                updatePathAlphaMethod.Invoke(f, new object[] { WaypointMapItem.WaypointAlpha });
+                updatePathAlphaMethod.Invoke(f, [WaypointMapItem.WaypointAlpha]);
                 //Only show the path end for the last fixed path
-                updatePathAlphaEndMethod.Invoke(f, new object[] { i == fixedPathHints.Count - 1 ? WaypointMapItem.WaypointAlpha : 0 });
+                updatePathAlphaEndMethod.Invoke(f, [i == fixedPathHints.Count - 1 ? WaypointMapItem.WaypointAlpha : 0]);
             }
             Managers.RecipeMap.path.fixedPathHints = oldActualPathFixedPathHints;
             Managers.RecipeMap.path.deletedGraphicsSegments = oldDeletedGraphicsSegments;
@@ -266,9 +272,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static void UpdateCurrentRecipePage()
         {
-            Managers.Potion.recipeBook.GetComponentsInChildren<RecipeBookRightPageContent>().ToList().ForEach(rightPageContent =>
+            RecipeBook.Instance.GetComponentsInChildren<RecipeBookRightPageContent>().ToList().ForEach(rightPageContent =>
             {
-                rightPageContent.UpdatePage(rightPageContent.currentState, rightPageContent.pageContentPotion);
+                rightPageContent.UpdatePage(rightPageContent.currentState, rightPageContent.GetRecipeBookPageContent(), rightPageContent.leftPageContent.page);
             });
         }
 
@@ -308,7 +314,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// Postfix method for ModifyBrewPotionButtonForWaypointRecipesPatch
         /// This method creates both the custom brew potion button and the recipe waypoint toggle button for this right page instance
         /// </summary>
-        public static void ModifyBrewPotionButtonForWaypointRecipes(RecipeBookBrewPotionButton instance, RecipeBookRightPageContent rightPageContent)
+        public static void ModifyBrewPotionButtonForWaypointRecipes(RecipeBookBrewRecipeButton instance, RecipeBookRightPageContent rightPageContent)
         {
             if (StaticStorage.TemporaryWaypoint != null)
             {
@@ -320,15 +326,16 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             const float recipeIconScaleFactor = 0.65f;
 
             CreateRecipeBookWaypointToggleButton(rightPageContent);
-            var isWaypointRecipe = RecipeService.IsWaypointRecipe(rightPageContent.pageContentPotion);
+            var rightPagePotion = rightPageContent.GetRecipeBookPageContent() as Potion;
+            var isWaypointRecipe = RecipeService.IsWaypointRecipe(rightPagePotion);
             if (isWaypointRecipe)
             {
                 if (!StaticStorage.WaypointBrewPotionButton.ContainsKey(rightPageContent))
                 {
                     var waypointInstance = UnityEngine.Object.Instantiate(instance, instance.transform.parent);
                     StaticStorage.WaypointBrewPotionButton[rightPageContent] = waypointInstance;
-                    typeof(RecipeBookBrewPotionButton).GetField("rightPageContent", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(waypointInstance, rightPageContent);
-                    var countText = typeof(RecipeBookBrewPotionButton).GetField("potionsCountText", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(waypointInstance) as TextMeshPro;
+                    typeof(RecipeBookBrewRecipeButton).GetField("rightPageContent", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(waypointInstance, rightPageContent);
+                    var countText = typeof(RecipeBookBrewRecipeButton).GetField("potionsCountText", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(waypointInstance) as TextMeshPro;
                     var buttonText = waypointInstance.texts.Where(t => t != countText).First();
                     countText.GetComponent<MeshRenderer>().enabled = false;
                     buttonText.text = "View waypoint on map";
@@ -343,14 +350,14 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 }
                 StaticStorage.WaypointBrewPotionButton[rightPageContent].gameObject.SetActive(true);
                 instance.gameObject.SetActive(false);
-                var canPress = rightPageContent.pageContentPotion?.potionBase?.name == GetCurrentPotionBase().name || !Managers.Potion.potionCraftPanel.IsPotionBrewingStarted();
+                var canPress = rightPagePotion.potionBase?.name == GetCurrentPotionBase().name || !Managers.Potion.potionCraftPanel.IsPotionBrewingStarted();
                 StaticStorage.WaypointBrewPotionButton[rightPageContent].Locked = !canPress;
 
                 //If BrewFromhere is installed we should create temporary waypoints when a new recipe is generated
                 if (StaticStorage.BrewFromHereInstalled)
                 {
-                    var currentIndex = Managers.Potion.recipeBook.currentPageIndex;
-                    StaticStorage.TemporaryWaypoint = AddWaypointToMap(new RecipeIndex { Index = currentIndex, Recipe = rightPageContent.pageContentPotion }, false);
+                    var currentIndex = RecipeBook.Instance.currentPageIndex;
+                    StaticStorage.TemporaryWaypoint = AddWaypointToMap(new RecipeIndex { Index = currentIndex, Recipe = rightPagePotion }, false);
                 }
             }
             else
@@ -385,12 +392,12 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 waypointButton.iconRenderer.sortingLayerID = instanceSprite.sortingLayerID;
             waypointButton.sortingGroup.sortingOrder =
                 waypointButton.iconRenderer.sortingOrder = instanceSprite.sortingOrder + 1;
-            var tooltipPosition = new List<PositioningSettings>
+            var tooltipPosition = new List<TooltipPositioningSettings>
             {
-                new PositioningSettings
+                new() 
                 {
-                    bindingPoint = PositioningSettings.BindingPoint.TransformPosition,
-                    tooltipCorner = PositioningSettings.TooltipCorner.RightBottom,
+                    bindingPoint = TooltipBindingPoint.TransformPosition,
+                    tooltipCorner = TooltipCorner.RightBottom,
                     position = new Vector2(4.5f, -0.4f)
                 }
             };
@@ -408,7 +415,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             {
                 var waypointButton = GetWaypointToggleButton(instance.transform);
                 var gameObject = waypointButton.gameObject;
-                var brewButton = typeof(RecipeBookRightPageContent).GetField("brewPotionButton", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(instance) as RecipeBookBrewPotionButton;
+                var brewButtonController = Traverse.Create(instance).Field<RecipeBookRightPageBottomButtonsController>("bottomButtonsController").Value;
+                var brewButton = Traverse.Create(brewButtonController).Field<RecipeBookBrewRecipeButton>("brewRecipeSoloButton").Value;
 
                 gameObject.transform.localPosition = new Vector3(2.7f, 4.55f, 0);
                 //Setup the raycast priority level so this button is prioritized along with other buttons on this page
@@ -421,12 +429,12 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                     waypointButton.iconRenderer.sortingLayerID = instanceSprite.sortingLayerID;
                 waypointButton.sortingGroup.sortingOrder =
                     waypointButton.iconRenderer.sortingOrder = instanceSprite.sortingOrder + 1;
-                var tooltipPosition = new List<PositioningSettings>
+                var tooltipPosition = new List<TooltipPositioningSettings>
                 {
-                    new PositioningSettings
+                    new TooltipPositioningSettings
                     {
-                        bindingPoint = PositioningSettings.BindingPoint.TransformPosition,
-                        tooltipCorner = PositioningSettings.TooltipCorner.LeftBottom,
+                        bindingPoint = TooltipBindingPoint.TransformPosition,
+                        tooltipCorner = TooltipCorner.LeftBottom,
                         position = new Vector2(0, -1.5f)
                     }
                 };
@@ -434,11 +442,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 StaticStorage.WaypointToggleButtonRecipeBook[instance] = waypointButton;
             }
             var button = StaticStorage.WaypointToggleButtonRecipeBook[instance];
-            var isWaypointRecipeIgnoreIgnored = RecipeService.IsWaypointRecipe(instance.pageContentPotion, true);
+            var isWaypointRecipeIgnoreIgnored = RecipeService.IsWaypointRecipe(instance.GetRecipeBookPageContent() as Potion, true);
             button.gameObject.SetActive(isWaypointRecipeIgnoreIgnored);
             if (!isWaypointRecipeIgnoreIgnored) return;
             var color = GetWaypointSpriteColor();
-            button.iconRenderer.color = StaticStorage.IgnoredWaypoints.Contains(RecipeService.GetRecipeIndexObject(instance.pageContentPotion).Index)
+            button.iconRenderer.color = StaticStorage.IgnoredWaypoints.Contains(RecipeService.GetRecipeIndexObject(instance.GetRecipeBookPageContent() as Potion).Index)
                                             ? new Color(color.r, color.g, color.b, button.OffAlpha)
                                             : color;
         }
@@ -462,7 +470,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 Plugin.PluginLogger.LogError($"Error: failed to find map for potion base {potionBase.name}");
                 return Vector2.zero;
             }
-            var mapEffect = map.potionEffectsOnMap.FirstOrDefault(e => e.Effect.name == potionEffect.name);
+            var mapEffect = map.referencesContainer.potionEffectsOnMap.FirstOrDefault(e => e.Effect.name == potionEffect.name);
             return mapEffect.thisTransform.localPosition;
         }
 
@@ -542,7 +550,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// <summary>
         /// Creates and adds a tooltip provider using the specified settings to the specified InteractiveItem
         /// </summary>
-        private static void AddTooltipProvider(InteractiveItem obj, GameObject gameObject, List<PositioningSettings> position)
+        private static void AddTooltipProvider(InteractiveItem obj, GameObject gameObject, List<TooltipPositioningSettings> position)
         {
             var tooltipProvider = gameObject.AddComponent<TooltipContentProvider>();
             tooltipProvider.positioningSettings = position;

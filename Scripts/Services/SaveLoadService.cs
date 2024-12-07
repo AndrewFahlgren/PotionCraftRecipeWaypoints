@@ -59,9 +59,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// Prefix method for RetreiveStoredIgnoredWaypointsPatch
         /// Reads the raw json string to find our custom field and parse any ignored waypoints within it
         /// </summary>
-        public static bool RetreiveStoredIgnoredWaypoints(Type type)
+        public static bool RetreiveStoredIgnoredWaypoints()
         {
-            if (type != typeof(ProgressState)) return true;
             var stateJsonString = StaticStorage.StateJsonString;
             StaticStorage.StateJsonString = null;
             if (string.IsNullOrEmpty(stateJsonString))

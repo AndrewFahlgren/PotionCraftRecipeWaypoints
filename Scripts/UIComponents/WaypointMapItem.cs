@@ -2,13 +2,13 @@
 using PotionCraft.ManagersSystem;
 using PotionCraft.ObjectBased.InteractiveItem;
 using PotionCraft.ObjectBased.RecipeMap;
-using PotionCraft.ObjectBased.UIElements.Tooltip;
 using PotionCraftRecipeWaypoints.Scripts.Services;
+using TooltipSystem;
 using UnityEngine;
 
 namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
 {
-    public class WaypointMapItem : PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.RecipeMapItem, IPrimaryCursorEventsHandler, ICustomCursorStateOnUse, ICustomCursorStateOnHover, IHoverable
+    public class WaypointMapItem : PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.RecipeMapItem, IPrimaryCursorEventsHandler, ICustomCursorVisualStateOnUse, ICustomCursorVisualStateOnHover, IHoverable
     {
         public const float WaypointAlpha = 0.75f;
 
@@ -19,12 +19,15 @@ namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
         public bool IsTailEndWaypoint;
         private bool loadedPath;
 
-        public void OnPrimaryCursorClick()
+        private bool isHovered;
+        public bool IsHovered { get => isHovered; set => SetHovered(value); }
+
+        public override void OnPrimaryCursorClick()
         {
             RecipeService.OpenPageOnWaypointClick(this);
         }
 
-        public bool OnPrimaryCursorRelease()
+        public new bool OnPrimaryCursorRelease()
         {
             return true;
         }
@@ -34,11 +37,12 @@ namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
             return Recipe.Recipe.GetTooltipContent(1);
         }
 
-        public CursorVisualState CursorStateOnUse() => CursorVisualState.Pressed;
-        public CursorVisualState CursorStateOnHover() => CursorVisualState.Pressed;
+        public CursorVisualState GetCursorVisualStateOnUse() => CursorVisualState.Pressed;
+        public CursorVisualState GetCursorVisualStateOnHover() => CursorVisualState.Pressed;
 
         public void SetHovered(bool hovered)
         {
+            isHovered = hovered;
             if (hovered && !loadedPath)
             {
                 UIService.CreateWaypointHoverPath(this);

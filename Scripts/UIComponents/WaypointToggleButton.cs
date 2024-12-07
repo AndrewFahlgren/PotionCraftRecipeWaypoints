@@ -3,25 +3,28 @@ using PotionCraft.ManagersSystem;
 using PotionCraft.ObjectBased.InteractiveItem;
 using PotionCraft.ObjectBased.RecipeMap.Buttons;
 using PotionCraft.ObjectBased.UIElements;
-using PotionCraft.ObjectBased.UIElements.Tooltip;
+using PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
 using PotionCraftRecipeWaypoints.Scripts.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TooltipSystem;
 using UnityEngine;
 
 namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
 {
-    public class WaypointToggleButton : InteractiveItem, IPrimaryCursorEventsHandler, ICustomCursorStateOnUse, ICustomCursorStateOnHover, IHoverable
+    public class WaypointToggleButton : InteractiveItem, IPrimaryCursorEventsHandler, ICustomCursorVisualStateOnUse, ICustomCursorVisualStateOnHover, IHoverable
     {
         public SpriteRenderer iconRenderer;
         public BoxCollider2D collider;
         public GameObject spriteSlot;
         public FollowIndicatorButton followButton;
-        public RecipeIndex currentRecipe => RecipeService.GetWaypointRecipeAtIndex(Managers.Potion.recipeBook.currentPageIndex);
+        public RecipeIndex currentRecipe => RecipeService.GetWaypointRecipeAtIndex(RecipeBook.Instance.currentPageIndex);
         public bool IsMapWaypointToggleButton => followButton != null;
 
         public float OffAlpha => 0.5f;
+
+        public bool IsHovered { get => followButton.IsHovered; set => SetHovered(value); }
 
         public void OnPrimaryCursorClick()
         {
@@ -60,8 +63,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.UIComponents
                 header = tooltipText
             };
         }
-        public CursorVisualState CursorStateOnUse() => CursorVisualState.Pressed;
-        public CursorVisualState CursorStateOnHover() => CursorVisualState.Pressed;
+        public CursorVisualState GetCursorVisualStateOnUse() => CursorVisualState.Pressed;
+        public CursorVisualState GetCursorVisualStateOnHover() => CursorVisualState.Pressed;
 
         public void SetHovered(bool hovered)
         {

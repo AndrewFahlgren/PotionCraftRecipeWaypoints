@@ -23,7 +23,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Storage
         //The recipe waypoint toggle button for each right page instance
         public static Dictionary<RecipeBookRightPageContent, WaypointToggleButton> WaypointToggleButtonRecipeBook = new();
         //The custom brew potion button for each right page instance
-        public static Dictionary<RecipeBookRightPageContent, RecipeBookBrewPotionButton> WaypointBrewPotionButton = new();
+        public static Dictionary<RecipeBookRightPageContent, RecipeBookBrewRecipeButton> WaypointBrewPotionButton = new();
 
         //Keeps track of which maps we have loaded
         public static List<PotionBase> LoadedPotionBases = new();

@@ -1,8 +1,10 @@
 ﻿using PotionCraft.ManagersSystem;
 using PotionCraft.ObjectBased.Potion;
 using PotionCraft.ObjectBased.UIElements.Bookmarks;
+using PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
 using PotionCraft.ScriptableObjects;
 using PotionCraft.ScriptableObjects.Potion;
+using PotionCraftRecipeWaypoints.Scripts.Extensions;
 using PotionCraftRecipeWaypoints.Scripts.Storage;
 using PotionCraftRecipeWaypoints.Scripts.UIComponents;
 using System.Collections.Generic;
@@ -25,8 +27,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
             StaticStorage.RecipesLoaded = true;
             if (!StaticStorage.AddedListeners)
             {
-                Managers.Potion.recipeBook.onRecipeAdded.AddListener(RecipeAdded);
-                Managers.Potion.recipeBook.bookmarkControllersGroupController.onBookmarksRearranged.AddListener(BookmarksRearranged);
+                RecipeBook.Instance.onRecipeAdded.AddListener(RecipeAdded);
+                RecipeBook.Instance.bookmarkControllersGroupController.onBookmarksRearranged.AddListener(BookmarksRearranged);
                 StaticStorage.AddedListeners = true;
             }
             SaveLoadService.LoadWaypoints();
@@ -38,9 +40,9 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
                 && waypoint != StaticStorage.TemporaryWaypoint)
             {
                 //In this case a bit of logic needs to be done to ensure BrewFromHere resets the saved recipe mark index
-                Managers.Potion.recipeBook.onPageChanged.Invoke(Managers.Potion.recipeBook.currentPageIndex, waypoint.Recipe.Index);
+                RecipeBook.Instance.onPageChanged.Invoke(RecipeBook.Instance.currentPageIndex, waypoint.Recipe.Index);
             }
-            Managers.Potion.recipeBook.OpenPageAt(waypoint.Recipe.Index);
+            RecipeBook.Instance.OpenPageAt(waypoint.Recipe.Index);
         }
 
         /// <summary>
@@ -58,7 +60,8 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 
         public static bool RecipeDeletedFromBook(Potion recipe)
         {
-            var recipeIndex = Managers.Potion.recipeBook.savedRecipes.IndexOf(recipe);
+            if (recipe == null) return true;
+            var recipeIndex = RecipeBook.Instance.savedRecipes.IndexOf(recipe);
             //We don't want the next recipe that goes into this slot to be ignored so remove this index from the ignore list
             if (StaticStorage.IgnoredWaypoints.Contains(recipeIndex))
             {
@@ -75,7 +78,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static Vector2 GetMapPositionForRecipe(Potion recipe, bool forceReturnIndicatorPosition = false)
         {
-            var pos = recipe.potionFromPanel.serializedPath.indicatorTargetPosition;
+            var pos = recipe.GetRecipeData().serializedPath.indicatorTargetPosition;
             if (forceReturnIndicatorPosition) return pos;
 
             //Return the tail end location for tail end waypoints
@@ -94,12 +97,12 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static Vector2 GetTailEndMapPositionForRecipe(Potion recipe)
         {
-            var lastPathPoint = recipe.potionFromPanel.serializedPath.fixedPathPoints
+            var lastPathPoint = recipe.GetRecipeData().serializedPath.fixedPathPoints
                                                                      .LastOrDefault(fpp => fpp.graphicsPoints?.Any() ?? false)
                                                                      ?.graphicsPoints
                                                                      ?.LastOrDefault() 
                                                                      ?? Vector2.zero;
-            var offset = recipe.potionFromPanel.serializedPath.indicatorTargetPosition + recipe.potionFromPanel.serializedPath.pathPosition;
+            var offset = recipe.GetRecipeData().serializedPath.indicatorTargetPosition + recipe.GetRecipeData().serializedPath.pathPosition;
             return new Vector2(lastPathPoint.x, lastPathPoint.y) + offset;
         }
 
@@ -109,11 +112,11 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static List<RecipeIndex> GetWaypointRecipes(PotionBase loadedPotionBase)
         {
-            var savedRecipes = Managers.Potion.recipeBook.savedRecipes;
+            var savedRecipes = RecipeBook.Instance.savedRecipes;
             var returnList = new List<RecipeIndex>();
             for (var i = 0; i < savedRecipes.Count; i++)
             {
-                var curRecipe = savedRecipes[i];
+                var curRecipe = savedRecipes[i] as Potion;
                 if (curRecipe == null) continue;
                 if (curRecipe.potionBase.name != loadedPotionBase.name) continue;
                 if (!IsWaypointRecipe(curRecipe)) continue;
@@ -182,7 +185,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         public static bool IsWaypointRecipe(Potion recipe, bool returnIgnored = false)
         {
             if (recipe == null) return false;
-            if (!returnIgnored && StaticStorage.IgnoredWaypoints.Contains(Managers.Potion.recipeBook.savedRecipes.IndexOf(recipe))) return false;
+            if (!returnIgnored && StaticStorage.IgnoredWaypoints.Contains(RecipeBook.Instance.savedRecipes.IndexOf(recipe))) return false;
             if (IsLegendaryRecipe(recipe)) return false;
             var recipeMapPosition = GetMapPositionForRecipe(recipe, true);
             var exclusionZone = GetWaypointExclusionZone();
@@ -201,7 +204,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
 
         private static bool HasLongRemainingPath(Potion recipe)
         {
-            return recipe.potionFromPanel.serializedPath.fixedPathPoints.Count > 1;
+            return recipe.GetRecipeData().serializedPath.fixedPathPoints.Count > 1;
         }
 
         public static float GetWaypointExclusionZone()
@@ -216,7 +219,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static RecipeIndex GetWaypointRecipeAtIndex(int index)
         {
-            var recipe = Managers.Potion.recipeBook.savedRecipes[index];
+            var recipe = RecipeBook.Instance.savedRecipes[index] as Potion;
             if (!IsWaypointRecipe(recipe, true)) return null;
             return new RecipeIndex { Index = index, Recipe = recipe };
         }
@@ -245,7 +248,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static bool IsLegendaryRecipe(Potion recipe)
         {
-            return recipe.potionFromPanel.recipeMarks.Count(m => m.type == SerializedRecipeMark.Type.PotionBase) > 1;
+            return recipe.GetRecipeData().recipeMarks.Count(m => m.type == RecipeBookRecipeMarkType.PotionBase) > 1;
         }
 
         /// <summary>
@@ -253,7 +256,7 @@ namespace PotionCraftRecipeWaypoints.Scripts.Services
         /// </summary>
         public static RecipeIndex GetRecipeIndexObject(Potion recipe)
         {
-            return new RecipeIndex { Recipe = recipe, Index = Managers.Potion.recipeBook.savedRecipes.IndexOf(recipe) };
+            return new RecipeIndex { Recipe = recipe, Index = RecipeBook.Instance.savedRecipes.IndexOf(recipe) };
         }
     }
 }

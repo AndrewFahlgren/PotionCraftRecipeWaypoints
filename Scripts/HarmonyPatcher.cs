@@ -3,12 +3,12 @@ using PotionCraft.ManagersSystem.SaveLoad;
 using PotionCraft.ObjectBased.InteractiveItem;
 using PotionCraft.ObjectBased.RecipeMap;
 using PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
-using PotionCraft.ObjectBased.UIElements.Tooltip;
 using PotionCraft.SaveFileSystem;
 using PotionCraft.SaveLoadSystem;
 using PotionCraft.ScriptableObjects.Potion;
 using PotionCraftRecipeWaypoints.Scripts.Services;
 using System;
+using TooltipSystem;
 
 namespace PotionCraftRecipeWaypoints.Scripts
 {
@@ -33,22 +33,22 @@ namespace PotionCraftRecipeWaypoints.Scripts
     [HarmonyPatch(typeof(RecipeBook), "EraseRecipe")]
     public class DeleteWaypointOnRecipeDeletePatch
     {
-        static bool Prefix(Potion potion)
+        static bool Prefix(IRecipeBookPageContent recipe)
         {
-            return Ex.RunSafe(() => RecipeService.RecipeDeletedFromBook(potion));
+            return Ex.RunSafe(() => RecipeService.RecipeDeletedFromBook(recipe as Potion));
         }
     }
 
-    [HarmonyPatch(typeof(RecipeBookBrewPotionButton), "UpdateVisual")]
+    [HarmonyPatch(typeof(RecipeBookBrewRecipeButton), "UpdateVisual")]
     public class ModifyBrewPotionButtonForWaypointRecipesPatch
     {
-        static void Postfix(RecipeBookBrewPotionButton __instance, RecipeBookRightPageContent ___rightPageContent)
+        static void Postfix(RecipeBookBrewRecipeButton __instance, RecipeBookRightPageContent ___rightPageContent)
         {
             Ex.RunSafe(() => UIService.ModifyBrewPotionButtonForWaypointRecipes(__instance, ___rightPageContent));
         }
     }
 
-    [HarmonyPatch(typeof(RecipeBookBrewPotionButton), "BrewPotion")]
+    [HarmonyPatch(typeof(RecipeBookBrewRecipeButton), "OnButtonReleasedPointerInside")]
     public class ViewWaypointOnMapPatch
     {
         static bool Prefix(RecipeBookRightPageContent ___rightPageContent)
@@ -60,8 +60,9 @@ namespace PotionCraftRecipeWaypoints.Scripts
         {
             try
             {
-                if (rightPageContent.pageContentPotion == null) return true;
-                if (!RecipeService.IsWaypointRecipe(rightPageContent.pageContentPotion)) return true;
+                var contentPotion = rightPageContent.GetRecipeBookPageContent() as Potion;
+                if (contentPotion == null) return true;
+                if (!RecipeService.IsWaypointRecipe(contentPotion)) return true;
                 return false;
             }
             catch (Exception ex)
@@ -88,9 +89,9 @@ namespace PotionCraftRecipeWaypoints.Scripts
         {
             try
             {
-                if (___interactiveItem is not RecipeBookBrewPotionButton brewButton) return;
+                if (___interactiveItem is not RecipeBookBrewRecipeButton brewButton) return;
                 var rightPageContent = AccessTools.Field(brewButton.GetType(), "rightPageContent").GetValue(brewButton) as RecipeBookRightPageContent;
-                if (RecipeService.IsWaypointRecipe(rightPageContent.pageContentPotion))
+                if (RecipeService.IsWaypointRecipe(rightPageContent.GetRecipeBookPageContent() as Potion))
                 {
                     __result = null;
                 }
@@ -120,12 +121,12 @@ namespace PotionCraftRecipeWaypoints.Scripts
         }
     }
 
-    [HarmonyPatch(typeof(SaveLoadManager), "LoadSelectedState")]
+    [HarmonyPatch(typeof(SaveLoadManager), "LoadProgressState")]
     public class RetreiveSavedAlchemyMachineRecipesFromSavedStatePatch
     {
-        static bool Prefix(Type type)
+        static bool Prefix()
         {
-            return Ex.RunSafe(() => SaveLoadService.RetreiveStoredIgnoredWaypoints(type));
+            return Ex.RunSafe(() => SaveLoadService.RetreiveStoredIgnoredWaypoints());
         }
     }
 

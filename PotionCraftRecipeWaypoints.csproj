@@ -31,6 +31,9 @@
     <Reference Include="PotionCraft.GamepadNavigation">
       <HintPath>lib\PotionCraft.GamepadNavigation.dll</HintPath>
     </Reference>
+    <Reference Include="PotionCraft.SceneLoader">
+      <HintPath>lib\PotionCraft.SceneLoader.dll</HintPath>
+    </Reference>
     <Reference Include="PotionCraft.Scripts">
       <HintPath>lib\PotionCraft.Scripts.dll</HintPath>
     </Reference>

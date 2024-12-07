@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace PotionCraftRecipeWaypoints
 {
-    [BepInPlugin(PLUGIN_GUID, "PotionCraftRecipeWaypoints", "1.0.5.2")]
+    [BepInPlugin(PLUGIN_GUID, "PotionCraftRecipeWaypoints", "1.1.0.0")]
     [BepInProcess("Potion Craft.exe")]
     [BepInDependency("com.fahlgorithm.potioncraftbrewfromhere", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
