@@ -1,5 +1,5 @@
 # Recipe Waypoints
-This is a Potion Craft mod to help with the managing of "waypoint" recipes. This mod is compatible with Potion Craft v1.1! 
+This is a Potion Craft mod to help with the managing of "waypoint" recipes. This mod is compatible with Potion Craft v2.0! 
 
 See the location on the map of your saved "waypoint" recipes. These include any recipes with no effects and any recipes which are far away from their last gathered effect.
 
@@ -57,8 +57,6 @@ See [this guide](https://docs.google.com/document/d/1Y3PDeMaffkh7x4U3j46YZ9K6AhM
 
 ## Other Mods
 I am making a series of mods which make recipes easier to use. All of these mods are intended to be balanced and feel like part of the base game:
-
-[Alchemy Machine Recipes](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Alchemy_Machine_Recipes/) - Enables the save recipe button when making things with the alchemy machine. Make legendary stones and salts with the click of a button!
 
 [Bookmark Organizer](https://potion-craft.thunderstore.io/package/AndrewFahlgren/Bookmark_Organizer/) - Lets you organize your recipes into groups! Save space in your recipe book and find the recipe you are looking for faster!
 
