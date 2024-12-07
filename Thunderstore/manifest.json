@@ -1,8 +1,8 @@
 ﻿{
   "name": "Recipe_Waypoints",
-  "version_number": "2.0.0",
+  "version_number": "2.0.1",
   "website_url": "https://github.com/AndrewFahlgren/PotionCraftRecipeWaypoints",
-  "description": "A mod to show waypoints on the map for unfinished recipes. Compatible with Potion Craft v1.1.",
+  "description": "A mod to show waypoints on the map for unfinished recipes. Compatible with Potion Craft v2.0.",
   "dependencies": [
     "BepInEx-BepInExPack_PotionCraft-5.4.18"
   ]
